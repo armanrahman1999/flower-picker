@@ -36,8 +36,9 @@ export default function Sky({ width = 800, height = 600 }: SkyProps) {
 
     let currentY = 0
     for (const band of bands) {
-      g.rect(0, currentY, width, band.h)
-      g.fill(band.color)
+      g.setFillStyle({ color: band.color })
+      g.drawRect(0, currentY, width, band.h)
+      g.fill()
       currentY += band.h
     }
 
@@ -47,23 +48,24 @@ export default function Sky({ width = 800, height = 600 }: SkyProps) {
   const drawClouds = useCallback((g: Graphics) => {
     g.clear()
 
-    // left cloud
-    g.rect(140, 95, 8, 8)
-    g.rect(148, 90, 8, 8)
-    g.rect(156, 90, 8, 8)
-    g.rect(164, 90, 8, 8)
-    g.rect(172, 95, 8, 8)
-    g.rect(148, 95, 24, 8)
-    g.fill(0xF0C8D8)
+    g.setFillStyle({ color: 0xF0C8D8 })
+    // left cloud (puffs)
+    g.drawCircle(144, 99, 8)
+    g.drawCircle(156, 96, 10)
+    g.drawCircle(168, 96, 10)
+    g.drawCircle(180, 96, 10)
+    g.drawCircle(192, 99, 8)
+    // base
+    g.drawRect(148, 99, 48, 16)
 
-    // right cloud
-    g.rect(620, 135, 8, 8)
-    g.rect(628, 130, 8, 8)
-    g.rect(636, 130, 8, 8)
-    g.rect(644, 130, 8, 8)
-    g.rect(652, 135, 8, 8)
-    g.rect(628, 135, 24, 8)
-    g.fill(0xF0C8D8)
+    // right cloud (puffs)
+    g.drawCircle(624, 139, 8)
+    g.drawCircle(636, 136, 10)
+    g.drawCircle(648, 136, 10)
+    g.drawCircle(660, 136, 10)
+    g.drawCircle(672, 139, 8)
+    g.drawRect(628, 139, 48, 16)
+    g.fill()
 
   }, [])
 

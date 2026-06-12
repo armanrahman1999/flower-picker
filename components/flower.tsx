@@ -15,21 +15,23 @@ interface FlowerProps {
 export default function Flower({ x, y, petalColor = 0xFF6090 }: FlowerProps) {
   const draw = useCallback((g: Graphics) => {
     g.clear()
-
     // stem
-    g.rect(-2, -24, 4, 24)
-    g.fill(0x3A7820)
+    g.setFillStyle({ color: 0x3A7820 })
+    g.drawRect(-2, -24, 4, 24)
+    g.fill()
 
     // petals (4 directions)
-    g.rect(-8, -36, 6, 6)   // left
-    g.rect(2, -36, 6, 6)    // right
-    g.rect(-2, -42, 6, 6)   // top
-    g.rect(-2, -30, 6, 6)   // bottom
-    g.fill(petalColor)
+    g.setFillStyle({ color: petalColor })
+    g.drawRect(-8, -36, 6, 6)   // left
+    g.drawRect(2, -36, 6, 6)    // right
+    g.drawRect(-2, -42, 6, 6)   // top
+    g.drawRect(-2, -30, 6, 6)   // bottom
+    g.fill()
 
     // center
-    g.rect(-2, -38, 6, 6)
-    g.fill(0xFFD040)
+    g.setFillStyle({ color: 0xFFD040 })
+    g.drawRect(-2, -38, 6, 6)
+    g.fill()
 
   }, [petalColor])
 

@@ -17,7 +17,7 @@ export default function PixiScene() {
       antialias={false}
       background="#1a1a2e"
     >
-      {/* <Sky width={800} height={600} /> */}
+      <Sky width={800} height={600} />
       <GrassField />
       <Tree x={100} y={400} />
       <Tree x={650} y={400} />

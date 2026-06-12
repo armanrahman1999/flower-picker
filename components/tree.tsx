@@ -16,20 +16,24 @@ export default function Tree({ x, y }: TreeProps) {
     g.clear()
 
     // trunk
-    g.rect(-8, 0, 16, 60)
-    g.fill(0x3D2010)
+    g.setFillStyle({ color: 0x3D2010 })
+    g.drawRect(-8, 0, 16, 60)
+    g.fill()
 
     // leaves bottom layer
-    g.rect(-48, -40, 96, 24)
-    g.fill(0x1A3A0A)
+    g.setFillStyle({ color: 0x1A3A0A })
+    g.drawRect(-48, -40, 96, 24)
+    g.fill()
 
     // leaves middle layer
-    g.rect(-40, -60, 80, 24)
-    g.fill(0x2A4A0E)
+    g.setFillStyle({ color: 0x2A4A0E })
+    g.drawRect(-40, -60, 80, 24)
+    g.fill()
 
     // leaves top layer
-    g.rect(-32, -80, 64, 24)
-    g.fill(0x304E10)
+    g.setFillStyle({ color: 0x304E10 })
+    g.drawRect(-32, -80, 64, 24)
+    g.fill()
 
   }, [])
 

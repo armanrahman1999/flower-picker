@@ -16,8 +16,9 @@ interface GrassBladeProps {
 export default function GrassBlade({ x, y, height = 20, color = 0x3A7018 }: GrassBladeProps) {
   const draw = useCallback((g: Graphics) => {
     g.clear()
-    g.rect(0, -height, 4, height)
-    g.fill(color)
+    g.setFillStyle({ color })
+    g.drawRect(0, -height, 4, height)
+    g.fill()
   }, [height, color])
 
   return <pixiGraphics draw={draw} x={x} y={y} />
