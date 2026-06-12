@@ -1,45 +1,49 @@
 'use client'
 
-import { extend } from '@pixi/react'
+import { extend, useApplication } from '@pixi/react'
 import { Graphics } from 'pixi.js'
 import { useCallback } from 'react'
 
 extend({ Graphics })
 
-interface SkyProps {
-  width?: number
-  height?: number
-}
+export default function Sky() {
+  const { app } = useApplication()
+  const width = app?.renderer?.width ?? 800
+  const height = app?.renderer?.height ?? 600
 
-export default function Sky({ width = 800, height = 600 }: SkyProps) {
   const draw = useCallback((g: Graphics) => {
     g.clear()
 
-    // each band matches the image top to bottom
+    // each band matches the image top to bottom (scaled to current height)
     const bands = [
-      { color: 0x1A0E3A, h: 40 },   // dark navy
-      { color: 0x2D1B5E, h: 35 },   // deep indigo
-      { color: 0x5B1F7A, h: 35 },   // purple
-      { color: 0x8B2080, h: 30 },   // magenta purple
-      { color: 0xBE2060, h: 30 },   // pink red
-      { color: 0xD93828, h: 30 },   // red
-      { color: 0xE85020, h: 28 },   // orange red
-      { color: 0xF06818, h: 28 },   // orange
-      { color: 0xF58018, h: 26 },   // amber orange
-      { color: 0xF9A020, h: 26 },   // amber
-      { color: 0xFBB830, h: 24 },   // golden amber
-      { color: 0xFDCC50, h: 22 },   // golden yellow
-      { color: 0xFEDA70, h: 20 },   // yellow
-      { color: 0xFEE890, h: 18 },   // pale yellow
-      { color: 0xFFF0B0, h: 16 },   // cream
+      { color: 0x1A0E3A, h: 40 },
+      { color: 0x2D1B5E, h: 35 },
+      { color: 0x5B1F7A, h: 35 },
+      { color: 0x8B2080, h: 30 },
+      { color: 0xBE2060, h: 30 },
+      { color: 0xD93828, h: 30 },
+      { color: 0xE85020, h: 28 },
+      { color: 0xF06818, h: 28 },
+      { color: 0xF58018, h: 26 },
+      { color: 0xF9A020, h: 26 },
+      { color: 0xFBB830, h: 24 },
+      { color: 0xFDCC50, h: 22 },
+      { color: 0xFEDA70, h: 20 },
+      { color: 0xFEE890, h: 18 },
+      { color: 0xFFF0B0, h: 16 },
     ]
+
+    // scale bands to fill height proportionally
+    const totalBandHeight = bands.reduce((s, b) => s + b.h, 0)
+    const scale = height / totalBandHeight
 
     let currentY = 0
     for (const band of bands) {
+      const h = Math.max(1, Math.round(band.h * scale))
       g.setFillStyle({ color: band.color })
-      g.drawRect(0, currentY, width, band.h)
+      g.drawRect(0, currentY, width, h)
       g.fill()
-      currentY += band.h
+      currentY += h
     }
 
   }, [width, height])
@@ -47,27 +51,31 @@ export default function Sky({ width = 800, height = 600 }: SkyProps) {
   // clouds
   const drawClouds = useCallback((g: Graphics) => {
     g.clear()
-
     g.setFillStyle({ color: 0xF0C8D8 })
-    // left cloud (puffs)
-    g.drawCircle(144, 99, 8)
-    g.drawCircle(156, 96, 10)
-    g.drawCircle(168, 96, 10)
-    g.drawCircle(180, 96, 10)
-    g.drawCircle(192, 99, 8)
-    // base
-    g.drawRect(148, 99, 48, 16)
 
-    // right cloud (puffs)
-    g.drawCircle(624, 139, 8)
-    g.drawCircle(636, 136, 10)
-    g.drawCircle(648, 136, 10)
-    g.drawCircle(660, 136, 10)
-    g.drawCircle(672, 139, 8)
-    g.drawRect(628, 139, 48, 16)
+    // position clouds as fractions of width/height
+    const lx = Math.round(width * 0.18)
+    const ly = Math.round(height * 0.16)
+    const rx = Math.round(width * 0.78)
+    const ry = Math.round(height * 0.22)
+
+    g.drawCircle(lx - 8, ly, Math.round(Math.max(6, width * 0.01)))
+    g.drawCircle(lx + 8, ly - 3, Math.round(Math.max(8, width * 0.012)))
+    g.drawCircle(lx + 24, ly - 3, Math.round(Math.max(8, width * 0.012)))
+    g.drawCircle(lx + 40, ly - 3, Math.round(Math.max(8, width * 0.012)))
+    g.drawCircle(lx + 56, ly, Math.round(Math.max(6, width * 0.01)))
+    g.drawRect(lx + 8, ly, Math.round(width * 0.06), Math.round(height * 0.03))
+
+    g.drawCircle(rx - 8, ry, Math.round(Math.max(6, width * 0.01)))
+    g.drawCircle(rx + 8, ry - 3, Math.round(Math.max(8, width * 0.012)))
+    g.drawCircle(rx + 24, ry - 3, Math.round(Math.max(8, width * 0.012)))
+    g.drawCircle(rx + 40, ry - 3, Math.round(Math.max(8, width * 0.012)))
+    g.drawCircle(rx + 56, ry, Math.round(Math.max(6, width * 0.01)))
+    g.drawRect(rx + 8, ry, Math.round(width * 0.06), Math.round(height * 0.03))
+
     g.fill()
 
-  }, [])
+  }, [width, height])
 
   return (
     <>
