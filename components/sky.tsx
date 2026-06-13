@@ -14,7 +14,6 @@ export default function Sky() {
   const draw = useCallback((g: Graphics) => {
     g.clear()
 
-    // each band matches the image top to bottom (scaled to current height)
     const bands = [
       { color: 0x1A0E3A, h: 40 },
       { color: 0x2D1B5E, h: 35 },
@@ -33,13 +32,12 @@ export default function Sky() {
       { color: 0xFFF0B0, h: 16 },
     ]
 
-    // scale bands to fill height proportionally
     const totalBandHeight = bands.reduce((s, b) => s + b.h, 0)
-    const scale = height / totalBandHeight
+    const scaleFactor = height / totalBandHeight
 
     let currentY = 0
     for (const band of bands) {
-      const h = Math.max(1, Math.round(band.h * scale))
+      const h = Math.max(1, Math.round(band.h * scaleFactor))
       g.setFillStyle({ color: band.color })
       g.drawRect(0, currentY, width, h)
       g.fill()
@@ -48,38 +46,119 @@ export default function Sky() {
 
   }, [width, height])
 
-  // clouds
+  const drawSun = useCallback((g: Graphics) => {
+    g.clear()
+
+    const P = 8  // pixel block size
+    // position sun center — horizontally centered, low in sky near horizon
+    const cx = Math.round(width * 0.5)
+    const cy = Math.round(height * 0.55)
+
+    // sun glow (outermost, faint yellow)
+    const glowCells = [
+      [0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],
+      [0,1],[6,1],
+      [0,2],[6,2],
+      [0,3],[6,3],
+      [0,4],[6,4],
+      [0,5],[6,5],
+      [0,6],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],
+    ]
+    for (const [col, row] of glowCells) {
+      g.rect(cx + (col - 3) * P, cy + (row - 3) * P, P, P)
+    }
+    g.fill(0xFFF5C0)
+
+    // sun body (bright white-yellow)
+    const bodyRows = [
+      [0,0,1,1,1,0,0],
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,0],
+      [0,0,1,1,1,0,0],
+    ]
+    for (let row = 0; row < bodyRows.length; row++) {
+      for (let col = 0; col < bodyRows[row].length; col++) {
+        if (bodyRows[row][col] === 1) {
+          g.rect(cx + (col - 3) * P, cy + (row - 3) * P, P, P)
+        }
+      }
+    }
+    g.fill(0xFFE060)
+
+    // sun core (brightest center)
+    const coreCells = [
+      [2,2],[3,2],[4,2],
+      [2,3],[3,3],[4,3],
+      [2,4],[3,4],[4,4],
+    ]
+    for (const [col, row] of coreCells) {
+      g.rect(cx + (col - 3) * P, cy + (row - 3) * P, P, P)
+    }
+    g.fill(0xFFFFCC)
+
+    // sun rays (pixel style, 8 directions)
+    const rayColor = 0xFFE060
+
+    // top ray
+    g.rect(cx - P/2, cy - 5*P, P, P)
+    g.fill(rayColor)
+
+    // bottom ray
+    g.rect(cx - P/2, cy + 4*P, P, P)
+    g.fill(rayColor)
+
+    // left ray
+    g.rect(cx - 5*P, cy - P/2, P, P)
+    g.fill(rayColor)
+
+    // right ray
+    g.rect(cx + 4*P, cy - P/2, P, P)
+    g.fill(rayColor)
+
+    // top-left ray
+    g.rect(cx - 4*P, cy - 4*P, P, P)
+    g.fill(rayColor)
+
+    // top-right ray
+    g.rect(cx + 3*P, cy - 4*P, P, P)
+    g.fill(rayColor)
+
+    // bottom-left ray
+    g.rect(cx - 4*P, cy + 3*P, P, P)
+    g.fill(rayColor)
+
+    // bottom-right ray
+    g.rect(cx + 3*P, cy + 3*P, P, P)
+    g.fill(rayColor)
+
+  }, [width, height])
+
   const drawClouds = useCallback((g: Graphics) => {
     g.clear()
-    g.setFillStyle({ color: 0xF0C8D8 })
 
-    // position clouds as fractions of width/height
-    const lx = Math.round(width * 0.18)
-    const ly = Math.round(height * 0.16)
-    const rx = Math.round(width * 0.78)
-    const ry = Math.round(height * 0.22)
+    const P = 8
 
-    g.drawCircle(lx - 8, ly, Math.round(Math.max(6, width * 0.01)))
-    g.drawCircle(lx + 8, ly - 3, Math.round(Math.max(8, width * 0.012)))
-    g.drawCircle(lx + 24, ly - 3, Math.round(Math.max(8, width * 0.012)))
-    g.drawCircle(lx + 40, ly - 3, Math.round(Math.max(8, width * 0.012)))
-    g.drawCircle(lx + 56, ly, Math.round(Math.max(6, width * 0.01)))
-    g.drawRect(lx + 8, ly, Math.round(width * 0.06), Math.round(height * 0.03))
+    const drawCloud = (cx: number, cy: number) => {
+      g.rect(cx + P,  cy - P * 2, P * 3, P)
+      g.rect(cx,      cy - P,     P * 5, P)
+      g.rect(cx - P,  cy,         P * 7, P)
+      g.rect(cx,      cy + P,     P * 5, P)
+    }
 
-    g.drawCircle(rx - 8, ry, Math.round(Math.max(6, width * 0.01)))
-    g.drawCircle(rx + 8, ry - 3, Math.round(Math.max(8, width * 0.012)))
-    g.drawCircle(rx + 24, ry - 3, Math.round(Math.max(8, width * 0.012)))
-    g.drawCircle(rx + 40, ry - 3, Math.round(Math.max(8, width * 0.012)))
-    g.drawCircle(rx + 56, ry, Math.round(Math.max(6, width * 0.01)))
-    g.drawRect(rx + 8, ry, Math.round(width * 0.06), Math.round(height * 0.03))
+    drawCloud(Math.round(width * 0.13), Math.round(height * 0.16))
+    drawCloud(Math.round(width * 0.68), Math.round(height * 0.22))
 
-    g.fill()
+    g.fill(0xF0C8D8)
 
   }, [width, height])
 
   return (
     <>
       <pixiGraphics draw={draw} x={0} y={0} />
+      <pixiGraphics draw={drawSun} x={10} y={-200} />
       <pixiGraphics draw={drawClouds} x={0} y={0} />
     </>
   )
