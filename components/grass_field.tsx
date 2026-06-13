@@ -12,8 +12,8 @@ const FLOWER_COLORS = [0xFF6090, 0xFF80A8, 0x80C0FF, 0xFFB0E0, 0xFFD040]
 
 export default function GrassField() {
   const { app } = useApplication()
-  const width = app?.renderer.width ?? 800
-  const height = app?.renderer.height ?? 600
+  const width = app?.renderer?.width ?? 800
+  const height = app?.renderer?.height ?? 600
 
   const bladeCount = Math.max(40, Math.floor(width / 10))
   const flowerCount = Math.max(6, Math.floor(width / 70))
