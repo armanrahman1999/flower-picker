@@ -3,12 +3,13 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { Application, extend } from '@pixi/react'
-import { Container, Graphics } from 'pixi.js'
+import { Graphics } from 'pixi.js'
 import Sky from './sky'
+import Ground from './ground'
 import GrassField from './grass_field'
 import Tree from './tree'
 
-extend({ Container, Graphics })
+extend({ Graphics })
 
 export default function PixiScene() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -51,9 +52,10 @@ export default function PixiScene() {
           background="#1a1a2e"
         >
           <Sky />
-          <GrassField />
+          <Ground width={size.width} height={size.height} />
           <Tree x={edgeMargin} y={groundY} />
           <Tree x={Math.max(edgeMargin, size.width - edgeMargin)} y={groundY} />
+          <GrassField renderGround={false} />
         </Application>
       )}
     </div>

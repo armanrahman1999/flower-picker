@@ -9,7 +9,11 @@ import Ground from "./ground"
 const GRASS_COLORS = [0x3A7018, 0x2C5C10, 0x488020, 0x345810]
 const FLOWER_COLORS = [0xFF6090, 0xFF80A8, 0x80C0FF, 0xFFB0E0, 0xFFD040]
 
-export default function GrassField() {
+interface GrassFieldProps {
+  renderGround?: boolean
+}
+
+export default function GrassField({ renderGround = true }: GrassFieldProps) {
   const { app } = useApplication()
   const width = app?.renderer?.width ?? 800
   const height = app?.renderer?.height ?? 600
@@ -32,7 +36,7 @@ export default function GrassField() {
 
   return (
     <>
-      <Ground width={width} height={1000} />
+      {renderGround && <Ground width={width} height={height} />}
 
       {grassBlades.map((blade, i) => (
         <GrassBlade
