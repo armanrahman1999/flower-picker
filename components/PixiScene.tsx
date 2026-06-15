@@ -12,12 +12,35 @@ extend({ Container, Graphics })
 
 export default function PixiScene() {
   const containerRef = useRef<HTMLDivElement>(null)
-
   const [mounted, setMounted] = useState(false)
+  const [size, setSize] = useState({ width: 800, height: 600 })
 
   useEffect(() => {
     setMounted(true)
+
+    const updateSize = () => {
+      if (containerRef.current) {
+        setSize({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        })
+      }
+    }
+
+    updateSize()
+
+    const resizeObserver = new ResizeObserver(updateSize)
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+
+    return () => {
+      resizeObserver.disconnect()
+    }
   }, [])
+
+  const groundY = size.height * 0.45
+  const edgeMargin = 48
 
   return (
     <div ref={containerRef} className="fixed inset-0 w-screen h-screen">
@@ -29,8 +52,8 @@ export default function PixiScene() {
         >
           <Sky />
           <GrassField />
-          <Tree x={100} y={400} />
-          <Tree x={650} y={400} />
+          <Tree x={edgeMargin} y={groundY} />
+          <Tree x={Math.max(edgeMargin, size.width - edgeMargin)} y={groundY} />
         </Application>
       )}
     </div>
