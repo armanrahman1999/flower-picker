@@ -17,11 +17,8 @@ export default function PixiScene() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [size, setSize] = useState({ width: 800, height: 600 })
-   const W = 800
-  const H = 600
-    const handX = W * 0.5
-  const handY = H * 0.95
-
+  const handX = size.width * 0.5
+  const handY = size.height * 0.78
   useEffect(() => {
     setMounted(true)
 

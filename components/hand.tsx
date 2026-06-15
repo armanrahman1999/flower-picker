@@ -22,7 +22,7 @@ export default function Hand({ x, y }: HandProps) {
 
     // ── ARM ──
     g.setFillStyle({ color: skin })
-    g.drawRect(-4*P, 8*P, 8*P, 10*P)
+    g.drawRect(-4*P, 8*P, 8*P, 12*P)
     g.fill()
 
     // arm shadow left
