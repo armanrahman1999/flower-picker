@@ -39,8 +39,8 @@ export default function PixiScene() {
     }
   }, [])
 
-  const groundY = size.height * 0.45
-  const edgeMargin = 48
+  const groundY = size.height * 0.56
+  const edgeMargin = Math.round(size.width * 0.07)
 
   return (
     <div ref={containerRef} className="fixed inset-0 w-screen h-screen">
