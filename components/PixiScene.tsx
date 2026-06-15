@@ -8,6 +8,8 @@ import Sky from './sky'
 import Ground from './ground'
 import GrassField from './grass_field'
 import Tree from './tree'
+import FlowerStem from './flower_stem'
+import Hand from './hand'
 
 extend({ Graphics })
 
@@ -15,6 +17,10 @@ export default function PixiScene() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [size, setSize] = useState({ width: 800, height: 600 })
+   const W = 800
+  const H = 600
+    const handX = W * 0.5
+  const handY = H * 0.95
 
   useEffect(() => {
     setMounted(true)
@@ -56,6 +62,8 @@ export default function PixiScene() {
           <Tree x={edgeMargin} y={groundY} />
           <Tree x={Math.max(edgeMargin, size.width - edgeMargin)} y={groundY} />
           <GrassField renderGround={false} />
+               <FlowerStem x={handX} y={handY} />
+      <Hand x={handX} y={handY} />
         </Application>
       )}
     </div>
