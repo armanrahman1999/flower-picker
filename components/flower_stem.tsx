@@ -84,25 +84,25 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     // top-left diagonal petal
     g.rect(fx - 3*P,   fy - 3*P,  2*P,   2*P)
     g.fill({ color: 0xFF5C8A })
-    g.rect(fx - 4*P,   fy - 4*P,  2*P,   2*P)
+    g.rect(fx - 5*P,   fy - 5*P,  3*P,   3*P)
     g.fill({ color: 0xFF80A8 })
 
     // top-right diagonal petal
     g.rect(fx + P,     fy - 3*P,  2*P,   2*P)
     g.fill({ color: 0xFF5C8A })
-    g.rect(fx + 2*P,   fy - 4*P,  2*P,   2*P)
+    g.rect(fx + 2*P,   fy - 5*P,  3*P,   3*P)
     g.fill({ color: 0xFF80A8 })
 
     // bottom-left diagonal petal
     g.rect(fx - 3*P,   fy + P,    2*P,   2*P)
     g.fill({ color: 0xFF5C8A })
-    g.rect(fx - 4*P,   fy + 2*P,  2*P,   2*P)
+    g.rect(fx - 5*P,   fy + 2*P,  3*P,   3*P)
     g.fill({ color: 0xFF80A8 })
 
     // bottom-right diagonal petal
     g.rect(fx + P,     fy + P,    2*P,   2*P)
     g.fill({ color: 0xFF5C8A })
-    g.rect(fx + 2*P,   fy + 2*P,  2*P,   2*P)
+    g.rect(fx + 2*P,   fy + 2*P,  3*P,   3*P)
     g.fill({ color: 0xFF80A8 })
 
     // center yellow
