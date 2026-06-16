@@ -59,8 +59,8 @@ export default function PixiScene() {
           <Tree x={edgeMargin} y={groundY} />
           <Tree x={Math.max(edgeMargin, size.width - edgeMargin)} y={groundY} />
           <GrassField renderGround={false} />
-               <FlowerStem x={handX} y={handY} />
-      <Hand x={handX} y={handY} />
+          <FlowerStem x={handX} y={size.height * 0.7} />
+          <Hand x={handX} y={handY} />
         </Application>
       )}
     </div>

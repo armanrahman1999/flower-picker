@@ -15,85 +15,109 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
   const draw = useCallback((g: Graphics) => {
     g.clear()
 
-    const P = 8
+    const P = 12
 
     // stem
-    g.setFillStyle({ color: 0x3A7820 })
-    g.drawRect(-P, 0, P, -18*P)
-    g.fill()
+    g.rect(-P/2, -14*P, P/2, 14*P)
+    g.fill({ color: 0x1E3F10 })
 
-    g.setFillStyle({ color: 0x2D6018 })
-    g.drawRect(0, 0, P, -18*P)
-    g.fill()
+    g.rect(0, -14*P, P/2, 14*P)
+    g.fill({ color: 0x2D6018 })
 
     // left leaf
-    g.setFillStyle({ color: 0x3A7820 })
-    g.drawRect(-4*P, -8*P, 3*P, P)
-    g.fill()
-    g.drawRect(-5*P, -9*P, 3*P, P)
-    g.fill()
+    g.rect(-4*P, -8*P, 3*P, P)
+    g.fill({ color: 0x3A7820 })
 
-    g.setFillStyle({ color: 0x4A8828 })
-    g.drawRect(-4*P, -9*P, 2*P, P)
-    g.fill()
+    g.rect(-5*P, -9*P, 3*P, P)
+    g.fill({ color: 0x3A7820 })
+
+    g.rect(-4*P, -9*P, 2*P, P)
+    g.fill({ color: 0x4A8828 })
 
     // right leaf
-    g.setFillStyle({ color: 0x3A7820 })
-    g.drawRect(P, -12*P, 3*P, P)
-    g.fill()
-    g.drawRect(2*P, -13*P, 3*P, P)
-    g.fill()
+    g.rect(P, -6*P, 3*P, P)
+    g.fill({ color: 0x3A7820 })
 
-    g.setFillStyle({ color: 0x4A8828 })
-    g.drawRect(2*P, -12*P, 2*P, P)
-    g.fill()
+    g.rect(2*P, -6*P, 3*P, P)
+    g.fill({ color: 0x3A7820 })
+
+    g.rect(P, -7*P, 2*P, P)
+    g.fill({ color: 0x4A8828 })
 
     // ── FLOWER HEAD ──
-    const P2 = P
     const fx = 0
-    const fy = -19*P
+    const fy = -13 * P
 
-    // petals
-    g.setFillStyle({ color: 0xFF6090 })
-    // top
-    g.drawRect(fx - P2,     fy - 3*P2, 2*P2, 2*P2)
-    g.fill()
-    // bottom
-    g.drawRect(fx - P2,     fy + 2*P2, 2*P2, 2*P2)
-    g.fill()
-    // left
-    g.drawRect(fx - 3*P2,   fy - P2,   2*P2, 2*P2)
-    g.fill()
-    // right
-    g.drawRect(fx + P2,     fy - P2,   2*P2, 2*P2)
-    g.fill()
+    // each petal: a tall box + a wider box at the base, stacked outward
+    // top petal
+    g.rect(fx - P,     fy - 4*P,  2*P,   P)
+    g.fill({ color: 0xFF4A7A })
+    g.rect(fx - P,     fy - 3*P,  2*P,   P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx - P/2,   fy - 5*P,  P,     P)
+    g.fill({ color: 0xFF80A8 })
 
-    // diagonal petals
-    g.setFillStyle({ color: 0xFF80A8 })
-    g.drawRect(fx - 3*P2,   fy - 3*P2, 2*P2, 2*P2)
-    g.fill()
-    g.drawRect(fx + P2,     fy - 3*P2, 2*P2, 2*P2)
-    g.fill()
-    g.drawRect(fx - 3*P2,   fy + P2,   2*P2, 2*P2)
-    g.fill()
-    g.drawRect(fx + P2,     fy + P2,   2*P2, 2*P2)
-    g.fill()
+    // bottom petal
+    g.rect(fx - P,     fy + 2*P,  2*P,   P)
+    g.fill({ color: 0xFF4A7A })
+    g.rect(fx - P,     fy + 3*P,  2*P,   P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx - P/2,   fy + 4*P,  P,     P)
+    g.fill({ color: 0xFF80A8 })
+
+    // left petal
+    g.rect(fx - 4*P,   fy - P,    P,     2*P)
+    g.fill({ color: 0xFF4A7A })
+    g.rect(fx - 3*P,   fy - P,    P,     2*P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx - 5*P,   fy - P/2,  P,     P)
+    g.fill({ color: 0xFF80A8 })
+
+    // right petal
+    g.rect(fx + 2*P,   fy - P,    P,     2*P)
+    g.fill({ color: 0xFF4A7A })
+    g.rect(fx + 3*P,   fy - P,    P,     2*P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx + 4*P,   fy - P/2,  P,     P)
+    g.fill({ color: 0xFF80A8 })
+
+    // top-left diagonal petal
+    g.rect(fx - 3*P,   fy - 3*P,  2*P,   2*P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx - 4*P,   fy - 4*P,  2*P,   2*P)
+    g.fill({ color: 0xFF80A8 })
+
+    // top-right diagonal petal
+    g.rect(fx + P,     fy - 3*P,  2*P,   2*P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx + 2*P,   fy - 4*P,  2*P,   2*P)
+    g.fill({ color: 0xFF80A8 })
+
+    // bottom-left diagonal petal
+    g.rect(fx - 3*P,   fy + P,    2*P,   2*P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx - 4*P,   fy + 2*P,  2*P,   2*P)
+    g.fill({ color: 0xFF80A8 })
+
+    // bottom-right diagonal petal
+    g.rect(fx + P,     fy + P,    2*P,   2*P)
+    g.fill({ color: 0xFF5C8A })
+    g.rect(fx + 2*P,   fy + 2*P,  2*P,   2*P)
+    g.fill({ color: 0xFF80A8 })
 
     // center yellow
-    g.setFillStyle({ color: 0xFFD040 })
-    g.drawRect(fx - P2, fy - P2, 2*P2, 2*P2)
-    g.fill()
+    g.rect(fx - P,   fy - P,   2*P,  2*P)
+    g.fill({ color: 0xFFD040 })
 
-    // center dots
-    g.setFillStyle({ color: 0xE8A020 })
-    g.drawRect(fx - P2/2, fy - P2/2, P2/2, P2/2)
-    g.fill()
-    g.drawRect(fx,        fy - P2/2, P2/2, P2/2)
-    g.fill()
-    g.drawRect(fx - P2/2, fy,        P2/2, P2/2)
-    g.fill()
-    g.drawRect(fx,        fy,        P2/2, P2/2)
-    g.fill()
+    // center detail dots
+    g.rect(fx - P/2, fy - P/2, P/2, P/2)
+    g.fill({ color: 0xE8A020 })
+    g.rect(fx,       fy - P/2, P/2, P/2)
+    g.fill({ color: 0xE8A020 })
+    g.rect(fx - P/2, fy,       P/2, P/2)
+    g.fill({ color: 0xE8A020 })
+    g.rect(fx,       fy,       P/2, P/2)
+    g.fill({ color: 0xE8A020 })
 
   }, [])
 
