@@ -62,8 +62,8 @@ export default function PixiScene() {
           {/* <GrassField renderGround={false} /> */}
           <GrassField renderGround={false} groundY={groundY} />
 
-          <FlowerStem x={handX} y={size.height * 0.7} />
           <Hand x={handX} y={handY} />
+          <FlowerStem x={handX} y={size.height * 0.7} />
         </Application>
       )}
     </div>
