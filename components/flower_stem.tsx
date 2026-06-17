@@ -13,8 +13,10 @@ interface FlowerStemProps {
 
 export default function FlowerStem({ x, y }: FlowerStemProps) {
   const [visible, setVisible] = useState(true);
+  const pickedRef = useRef(false);
   const timerRef = useRef<number | null>(null);
-  const hitArea = useMemo(() => new Rectangle(-60, -350, 120, 350), []);
+  // HEAD_SCALE 1.5 petals extend ~±75px; previous ±60 area missed outer petals
+  const hitArea = useMemo(() => new Rectangle(-90, -360, 180, 370), []);
 
   useEffect(() => {
     return () => {
@@ -22,12 +24,16 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     };
   }, []);
 
-  const handlePointerDown = () => {
-    if (!visible) return;
+  const handlePointerDown = useCallback(() => {
+    if (pickedRef.current) return;
+    pickedRef.current = true;
     setVisible(false);
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => setVisible(true), 4000);
-  };
+    timerRef.current = window.setTimeout(() => {
+      pickedRef.current = false;
+      setVisible(true);
+    }, 4000);
+  }, []);
 
   const draw = useCallback((g: Graphics) => {
     g.clear();
@@ -174,10 +180,10 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
       x={x}
       y={y}
       visible={visible}
-      interactive={true}
+      eventMode="static"
       hitArea={hitArea}
-      onPointerDown={() => handlePointerDown()}
-      cursor={"pointer"}
+      onPointerDown={handlePointerDown}
+      cursor="pointer"
     />
   );
 }

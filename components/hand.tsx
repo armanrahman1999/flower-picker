@@ -155,5 +155,5 @@ g.fill()
 
   }, [])
 
-  return <pixiGraphics draw={draw} x={x} y={y} />
+  return <pixiGraphics draw={draw} x={x} y={y} eventMode="none" />
 }
