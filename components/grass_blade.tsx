@@ -34,18 +34,29 @@ export default function GrassTuft({ x, y, depth, variant }: GrassTuftProps) {
     const alpha = 0.5 + depth * 0.5
     const baseH = Math.round(7 + depth * 24)
 
-    const blades = [
-      { ox: 0, h: baseH, w: 3 },
-      { ox: -4 - Math.round(rand() * 2), h: Math.round(baseH * (0.62 + rand() * 0.12)), w: 2 },
-      { ox: 4 + Math.round(rand() * 2), h: Math.round(baseH * (0.68 + rand() * 0.1)), w: 2 },
-    ]
+    // choose single-blade with ~60% probability
+    const singleBladeRoll = rand()
+    let blades = [] as { ox: number; h: number; w: number }[]
 
-    if (depth > 0.45 && rand() > 0.35) {
-      blades.push({
-        ox: -7 + Math.round(rand() * 2),
-        h: Math.round(baseH * 0.5),
-        w: 2,
-      })
+    if (singleBladeRoll < 0.6) {
+      // single tall blade centered
+      blades = [
+        { ox: 0, h: Math.round(baseH * (1.05 + rand() * 0.25)), w: 3 },
+      ]
+    } else {
+      blades = [
+        { ox: 0, h: baseH, w: 3 },
+        { ox: -4 - Math.round(rand() * 2), h: Math.round(baseH * (0.62 + rand() * 0.12)), w: 2 },
+        { ox: 4 + Math.round(rand() * 2), h: Math.round(baseH * (0.68 + rand() * 0.1)), w: 2 },
+      ]
+
+      if (depth > 0.45 && rand() > 0.35) {
+        blades.push({
+          ox: -7 + Math.round(rand() * 2),
+          h: Math.round(baseH * 0.5),
+          w: 2,
+        })
+      }
     }
 
     for (const blade of blades) {

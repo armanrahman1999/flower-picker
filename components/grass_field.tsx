@@ -55,10 +55,11 @@ export default function GrassField({
     const cellW = width / cols;
     const cellH = fieldHeight / rows;
 
+    // increase base chance to make the field noticeably denser
     const depthBands = [
-      { rowStart: 0, rowEnd: Math.floor(rows * 0.3), chance: 0.28 },
-      { rowStart: Math.floor(rows * 0.3), rowEnd: Math.floor(rows * 0.6), chance: 0.42 },
-      { rowStart: Math.floor(rows * 0.6), rowEnd: rows, chance: 0.58 },
+      { rowStart: 0, rowEnd: Math.floor(rows * 0.3), chance: 0.48 },
+      { rowStart: Math.floor(rows * 0.3), rowEnd: Math.floor(rows * 0.6), chance: 0.62 },
+      { rowStart: Math.floor(rows * 0.6), rowEnd: rows, chance: 0.8 },
     ];
 
     let variant = 0;
@@ -119,6 +120,78 @@ export default function GrassField({
         break;
       }
       if (!placed) break;
+    }
+
+    // add a few extra tufts near the top edge of the field to fill sparse area
+    const extraTopCount = Math.max(4, Math.floor(cols * 0.42))
+    for (let i = 0; i < extraTopCount; i++) {
+      const x = Math.round(cellW * 0.2 + rand() * (width - cellW * 0.4))
+      const y = Math.round(fieldTop + rand() * Math.max(8, cellH * 0.4))
+      if (inClearZone(x, y)) continue
+      const depth = 0.1 + rand() * 0.3
+      items.push({ kind: "tuft", x, y, depth, variant: variant++ })
+    }
+
+    // add concentrated tufts near the center-top (closer to the flower stem)
+    const extraCenterCount = Math.max(3, Math.floor(cols * 0.18))
+    for (let i = 0; i < extraCenterCount; i++) {
+      const x = Math.round(centerX - excludeHalfW * 0.5 + rand() * (excludeHalfW))
+      const y = Math.round(fieldTop + rand() * Math.max(6, cellH * 0.35))
+      const depth = 0.15 + rand() * 0.45
+      items.push({ kind: "tuft", x, y, depth, variant: variant++ })
+    }
+
+    // add a few small extra flowers near the top-center to complement the stem
+    const extraFlowers = Math.max(2, Math.floor(cols * 0.08))
+    for (let i = 0; i < extraFlowers; i++) {
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const fx = Math.round(centerX - Math.floor(width * 0.12) + flowerRand() * (Math.floor(width * 0.24)))
+        const fy = Math.round(fieldTop + flowerRand() * Math.max(12, cellH * 0.45))
+        const tooClose = placedFlowers.some((f) => {
+          const dx = f.x - fx
+          const dy = f.y - fy
+          return dx * dx + dy * dy < 80 * 80
+        })
+        if (tooClose) continue
+        placedFlowers.push({ x: fx, y: fy })
+        const depth = 0.25 + flowerRand() * 0.45
+        items.push({
+          kind: "flower",
+          x: fx,
+          y: fy,
+          depth,
+          scale: 0.45 + depth * 0.55,
+          petalColor: FLOWER_COLORS[Math.floor(flowerRand() * FLOWER_COLORS.length)],
+        })
+        break
+      }
+    }
+
+    // scatter some additional flowers across the field to increase floral density
+    const scatterFlowers = Math.max(2, Math.floor(width / 160))
+    for (let i = 0; i < scatterFlowers; i++) {
+      for (let attempt = 0; attempt < 10; attempt++) {
+        const fx = Math.round(60 + flowerRand() * (width - 120))
+        const fy = Math.round(fieldTop + flowerRand() * fieldHeight)
+        if (inClearZone(fx, fy)) continue
+        const tooClose = placedFlowers.some((f) => {
+          const dx = f.x - fx
+          const dy = f.y - fy
+          return dx * dx + dy * dy < 90 * 90
+        })
+        if (tooClose) continue
+        placedFlowers.push({ x: fx, y: fy })
+        const depth = 0.3 + flowerRand() * 0.55
+        items.push({
+          kind: "flower",
+          x: fx,
+          y: fy,
+          depth,
+          scale: 0.5 + depth * 0.55,
+          petalColor: FLOWER_COLORS[Math.floor(flowerRand() * FLOWER_COLORS.length)],
+        })
+        break
+      }
     }
 
     return items.sort((a, b) => a.y - b.y);
