@@ -126,17 +126,22 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     g.drawRect(fx - 1.3 * S, fy - 3.05 * S, 2.6 * S, 3.5 * S);
     g.fill();
 
-    // ── DOT GRID inside center (3x3 dark amber dots) ──
+    // ── DOT GRID inside center (3x3 dark amber dots), centered on light yellow
     const dot = 0xc87010;
     const dotSize = S * 0.5;
     const dotGap = S * 1.1;
+
+    // compute grid start so the grid is centered at the light-yellow center (fx, fy - 1.3*S)
+    const gridSpan = 2 * dotGap + dotSize; // total span of 3 dots
+    const startX = fx - gridSpan / 2;
+    const startY = fy - 1.3 * S - gridSpan / 2;
 
     g.setFillStyle({ color: dot });
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         g.drawRect(
-          fx - S + col * dotGap,
-          fy - S + row * dotGap,
+          startX + col * dotGap,
+          startY + row * dotGap,
           dotSize,
           dotSize,
         );
