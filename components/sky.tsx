@@ -2,7 +2,7 @@
 
 import { extend, useApplication } from "@pixi/react";
 import { Graphics } from "pixi.js";
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
 extend({ Graphics });
 
@@ -10,6 +10,29 @@ export default function Sky() {
   const { app } = useApplication();
   const width = app?.renderer?.width ?? 800;
   const height = app?.renderer?.height ?? 600;
+  const cloudRef = useRef<Graphics | null>(null);
+  const cloudTimeRef = useRef(0);
+
+  useEffect(() => {
+    if (!app || !(app as any).ticker) return;
+
+    const baseX = 0;
+    const cloudAmplitude = Math.max(32, width * 0.12);
+    const cloudSpeed = 0.14;
+
+    const tick = (delta: any) => {
+      const dt = typeof delta === "number" ? delta / 60 : (delta.deltaTime ?? delta.delta ?? 16) / 1000;
+      cloudTimeRef.current += dt;
+      const offset = -Math.sin(cloudTimeRef.current * cloudSpeed) * cloudAmplitude;
+      if (cloudRef.current) cloudRef.current.position.set(baseX + offset, 0);
+    };
+
+    (app as any).ticker.add(tick as any);
+    return () => {
+      (app as any).ticker.remove(tick as any);
+      if (cloudRef.current) cloudRef.current.position.set(baseX, 0);
+    };
+  }, [app, width]);
 
   const draw = useCallback(
     (g: Graphics) => {
@@ -124,7 +147,7 @@ export default function Sky() {
     <>
       <pixiGraphics draw={draw} x={0} y={0} />
       <pixiGraphics draw={drawSun} x={0} y={-100} />
-      <pixiGraphics draw={drawClouds} x={0} y={0} />
+      <pixiGraphics ref={cloudRef} draw={drawClouds} x={0} y={0} />
     </>
   );
 }
