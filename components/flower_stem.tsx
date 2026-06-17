@@ -2,7 +2,7 @@
 
 import { extend } from "@pixi/react";
 import { Graphics } from "pixi.js";
-import { useCallback } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 
 extend({ Graphics });
 
@@ -12,18 +12,36 @@ interface FlowerStemProps {
 }
 
 export default function FlowerStem({ x, y }: FlowerStemProps) {
+  const [visible, setVisible] = useState(true);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handlePointerDown = () => {
+    if (!visible) return;
+    setVisible(false);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setVisible(true), 4000);
+  };
+
   const draw = useCallback((g: Graphics) => {
     g.clear();
 
     const P = 8;
+    // stem length in "P" units (previously 22)
+    const STEM_UNITS = 32;
 
     // ── STEM ──
     g.setFillStyle({ color: 0x3a7820 });
-    g.drawRect(-P, -22 * P, P, 22 * P);
+    g.drawRect(-P, -STEM_UNITS * P, P, STEM_UNITS * P);
     g.fill();
 
     g.setFillStyle({ color: 0x2d6018 });
-    g.drawRect(0, -22 * P, P, 22 * P);
+    g.drawRect(0, -STEM_UNITS * P, P, STEM_UNITS * P);
     g.fill();
 
     // left leaf
@@ -48,9 +66,10 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
 
     // ── FLOWER HEAD ──
     // petals are 20% bigger so use 1.2 multiplier
-    const S = P * 1.2; // scaled pixel = 9.6px
+    const HEAD_SCALE = 1.5; // increase to make the flower head larger
+    const S = P * 1.2 * HEAD_SCALE; // scaled pixel = 9.6px * HEAD_SCALE
     const fx = 0;
-    const fy = -22 * P;
+    const fy = -STEM_UNITS * P;
 
     // ── OUTER DARK PINK RING (outermost petal edges) ──
 
@@ -88,12 +107,22 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     const outerPink = 0xe8407a;
 
     g.setFillStyle({ color: outerPink });
-    g.drawRect(fx - 4.4 * S, fy - 4.2 * S, 1.3 * S, 2 * S);
-    g.drawRect(fx - 4.4 * S, fy - 0.5 * S, 1.3 * S, 2 * S);
-    g.drawRect(fx - 3.8 * S, fy - 2.6 * S, 1.3 * S, 2.5 * S);
-    g.drawRect(fx + 3.2 * S, fy - 4.2 * S, 1.3 * S, 2 * S);
-    g.drawRect(fx + 3.2 * S, fy - 0.5 * S, 1.3 * S, 2 * S);
-    g.drawRect(fx + 2.5 * S, fy - 2.6 * S, 1.3 * S, 2.5 * S);
+    // use center-based values and mirror left/right for perfect symmetry
+    const outerCols = [
+      { centerX: 3.75 * S, yTop: fy - 4.2 * S, w: 1.3 * S, h: 2 * S },
+      { centerX: 3.75 * S, yTop: fy - 0.5 * S, w: 1.3 * S, h: 2 * S },
+      { centerX: 3.15 * S, yTop: fy - 2.6 * S, w: 1.3 * S, h: 2.5 * S },
+    ];
+
+    for (const c of outerCols) {
+      const halfW = c.w / 2;
+      // left
+      g.drawRect(fx - c.centerX - halfW, c.yTop, c.w, c.h);
+      // right
+      g.drawRect(fx + c.centerX - halfW, c.yTop, c.w, c.h);
+    }
+
+    // center horizontal accents (top and bottom) — keep centered on fx
     g.drawRect(fx - 1.4 * S, fy - 6.3 * S, 2.8 * S, 1.5 * S);
     g.drawRect(fx - 1.4 * S, fy + 2.6 * S, 2.8 * S, 1.5 * S);
     g.fill();
@@ -138,5 +167,15 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     }
   }, []);
 
-  return <pixiGraphics draw={draw} x={x} y={y} />;
+  return (
+    <pixiGraphics
+      draw={draw}
+      x={x}
+      y={y}
+      visible={visible}
+      interactive={true}
+      onPointerDown={() => handlePointerDown()}
+      cursor={"pointer"}
+    />
+  );
 }
