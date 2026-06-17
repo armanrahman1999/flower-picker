@@ -1,38 +1,46 @@
-'use client'
+"use client";
 
-import { useMemo } from 'react'
-import { useApplication } from '@pixi/react'
-import Flower from "./flower"
-import GrassBlade from "./grass_blade"
-import Ground from "./ground"
+import { useMemo } from "react";
+import { useApplication } from "@pixi/react";
+import Flower from "./flower";
+import GrassBlade from "./grass_blade";
+import Ground from "./ground";
 
-const GRASS_COLORS = [0x3A7018, 0x2C5C10, 0x488020, 0x345810]
-const FLOWER_COLORS = [0xFF6090, 0xFF80A8, 0x80C0FF, 0xFFB0E0, 0xFFD040]
+const GRASS_COLORS = [0x3a7018, 0x2c5c10, 0x488020, 0x345810];
+const FLOWER_COLORS = [0xff6090, 0xff80a8, 0x80c0ff, 0xffb0e0, 0xffd040];
 
 interface GrassFieldProps {
-  renderGround?: boolean
+  renderGround?: boolean;
 }
 
 export default function GrassField({ renderGround = true }: GrassFieldProps) {
-  const { app } = useApplication()
-  const width = app?.renderer?.width ?? 800
-  const height = app?.renderer?.height ?? 600
+  const { app } = useApplication();
+  const width = app?.renderer?.width ?? 800;
+  const height = app?.renderer?.height ?? 600;
 
-  const bladeCount = Math.max(40, Math.floor(width / 10))
-  const flowerCount = Math.max(8, Math.floor(width / 70))
+  const bladeCount = Math.max(40, Math.floor(width / 10));
+  const flowerCount = Math.max(8, Math.floor(width / 70));
 
-  const grassBlades = useMemo(() => Array.from({ length: bladeCount }, (_, i) => ({
-    x: Math.round((i * (width / bladeCount)) + ((i % 3) * 6)),
-    y: Math.round(height * 0.64 + (i % 5) * 4),
-    height: 8 + (i % 4) * 4,
-    color: GRASS_COLORS[i % GRASS_COLORS.length]
-  })), [bladeCount, width, height])
+  const grassBlades = useMemo(
+    () =>
+      Array.from({ length: bladeCount }, (_, i) => ({
+        x: Math.round(i * (width / bladeCount) + (i % 3) * 6),
+        y: Math.round(height * 0.64 + (i % 5) * 4),
+        height: 8 + (i % 4) * 4,
+        color: GRASS_COLORS[i % GRASS_COLORS.length],
+      })),
+    [bladeCount, width, height],
+  );
 
-  const flowers = useMemo(() => Array.from({ length: flowerCount }, (_, i) => ({
-    x: Math.round((i + 0.5) * (width / flowerCount)),
-    y: Math.round(height * 0.64 + (i % 3) * 6),
-    petalColor: FLOWER_COLORS[i % FLOWER_COLORS.length]
-  })), [flowerCount, width, height])
+  const flowers = useMemo(
+    () =>
+      Array.from({ length: flowerCount }, (_, i) => ({
+        x: Math.round((i + 0.5) * (width / flowerCount)),
+        y: Math.round(height * 0.64 + (i % 3) * 6),
+        petalColor: FLOWER_COLORS[i % FLOWER_COLORS.length],
+      })),
+    [flowerCount, width, height],
+  );
 
   return (
     <>
@@ -57,5 +65,5 @@ export default function GrassField({ renderGround = true }: GrassFieldProps) {
         />
       ))}
     </>
-  )
+  );
 }
