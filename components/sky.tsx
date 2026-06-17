@@ -39,24 +39,16 @@ export default function Sky() {
       g.clear();
 
       const bands = [
-        // { color: 0x1a0e3a, h: 30 },
         { color: 0x2d1b5e, h: 26 },
         { color: 0x5b1f7a, h: 24 },
         { color: 0x8b2080, h: 20 },
         { color: 0xbe2060, h: 18 },
-        // { color: 0xd93828, h: 18 },
         { color: 0xe85020, h: 17 },
         { color: 0xf06818, h: 16 },
         { color: 0xf58018, h: 14 },
-        // { color: 0xf9a020, h: 6 },
         { color: 0xfbb830, h: 12 },
         { color: 0xfdcc50, h: 10 },
         { color: 0xfeda70, h: 8 },
-        // { color: 0xfee890, h: 13 },
-        // { color: 0xfff0b0, h: 12 },
-        // { color: 0xfff0b0, h: 12 },
-        // { color: 0xfff0b0, h: 12 },
-        // { color: 0xfff0b0, h: 12 },
         { color: 0xfff0b0, h: 130 },
       ];
 
@@ -126,17 +118,47 @@ export default function Sky() {
     (g: Graphics) => {
       g.clear();
 
-      const P = 8;
+      // Each cloud shape is built from its own pixel unit (p) so size variation
+      // changes the blockiness too, not just a uniform scale — small clouds
+      // read as "further away" with chunkier relative pixels.
 
-      const drawCloud = (cx: number, cy: number) => {
-        g.rect(cx + P, cy - P * 2, P * 3, P);
-        g.rect(cx, cy - P, P * 5, P);
-        g.rect(cx - P, cy, P * 7, P);
-        g.rect(cx, cy + P, P * 5, P);
+      // Wide, low, gently lobed silhouette (the original shape, slightly tuned).
+      const drawCloudWide = (cx: number, cy: number, p: number) => {
+        g.rect(cx + p, cy - p * 2, p * 3, p);
+        g.rect(cx, cy - p, p * 5, p);
+        g.rect(cx - p, cy, p * 7, p);
+        g.rect(cx, cy + p, p * 5, p);
       };
 
-      drawCloud(Math.round(width * 0.13), Math.round(height * 0.16));
-      drawCloud(Math.round(width * 0.68), Math.round(height * 0.22));
+      // Tall, puffier silhouette with a stacked double-bump top.
+      const drawCloudPuffy = (cx: number, cy: number, p: number) => {
+        g.rect(cx, cy - p * 3, p * 2, p);
+        g.rect(cx + p * 3, cy - p * 3, p * 2, p);
+        g.rect(cx - p, cy - p * 2, p * 7, p);
+        g.rect(cx - p * 2, cy - p, p * 9, p);
+        g.rect(cx - p, cy, p * 7, p);
+      };
+
+      // Small, compact wisp — fewer lobes, reads as distant/thin.
+      const drawCloudWisp = (cx: number, cy: number, p: number) => {
+        g.rect(cx, cy - p, p * 3, p);
+        g.rect(cx - p, cy, p * 5, p);
+        g.rect(cx + p, cy + p, p * 2, p);
+      };
+
+      // Stretched, flat streak — long and low, good for filling horizontal gaps.
+      const drawCloudStreak = (cx: number, cy: number, p: number) => {
+        g.rect(cx + p * 2, cy - p, p * 3, p);
+        g.rect(cx - p * 2, cy, p * 10, p);
+        g.rect(cx, cy + p, p * 4, p);
+      };
+
+      // Staggered across varied heights and x-positions, with size scaled
+      // to suggest depth and avoid an even, grid-like distribution.
+      drawCloudWide(Math.round(width * 0.12), Math.round(height * 0.14), 7);
+      drawCloudWisp(Math.round(width * 0.34), Math.round(height * 0.09), 5);
+      drawCloudPuffy(Math.round(width * 0.62), Math.round(height * 0.2), 7);
+      drawCloudStreak(Math.round(width * 0.85), Math.round(height * 0.12), 6);
 
       g.fill(0xf0c8d8);
     },
