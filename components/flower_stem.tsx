@@ -1,8 +1,8 @@
 "use client";
 
 import { extend } from "@pixi/react";
-import { Graphics } from "pixi.js";
-import { useCallback, useState, useRef, useEffect } from "react";
+import { Graphics, Rectangle } from "pixi.js";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 
 extend({ Graphics });
 
@@ -14,6 +14,7 @@ interface FlowerStemProps {
 export default function FlowerStem({ x, y }: FlowerStemProps) {
   const [visible, setVisible] = useState(true);
   const timerRef = useRef<number | null>(null);
+  const hitArea = useMemo(() => new Rectangle(-60, -350, 120, 350), []);
 
   useEffect(() => {
     return () => {
@@ -174,6 +175,7 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
       y={y}
       visible={visible}
       interactive={true}
+      hitArea={hitArea}
       onPointerDown={() => handlePointerDown()}
       cursor={"pointer"}
     />
