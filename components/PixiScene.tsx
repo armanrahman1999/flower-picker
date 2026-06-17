@@ -18,6 +18,8 @@ export default function PixiScene() {
   const [resizeTarget, setResizeTarget] = useState<HTMLDivElement | null>(null);
   const handX = size.width * 0.5;
   const handY = size.height * 0.78;
+  const groundgY = size.height * 0.56;
+
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
@@ -57,7 +59,9 @@ export default function PixiScene() {
           <Ground width={size.width} height={size.height} />
           <Tree x={edgeMargin} y={groundY} />
           <Tree x={Math.max(edgeMargin, size.width - edgeMargin)} y={groundY} />
-          <GrassField renderGround={false} />
+          {/* <GrassField renderGround={false} /> */}
+          <GrassField renderGround={false} groundY={groundY} />
+
           <FlowerStem x={handX} y={size.height * 0.7} />
           <Hand x={handX} y={handY} />
         </Application>
