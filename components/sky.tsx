@@ -1,165 +1,130 @@
-'use client'
+"use client";
 
-import { extend, useApplication } from '@pixi/react'
-import { Graphics } from 'pixi.js'
-import { useCallback } from 'react'
+import { extend, useApplication } from "@pixi/react";
+import { Graphics } from "pixi.js";
+import { useCallback } from "react";
 
-extend({ Graphics })
+extend({ Graphics });
 
 export default function Sky() {
-  const { app } = useApplication()
-  const width = app?.renderer?.width ?? 800
-  const height = app?.renderer?.height ?? 600
+  const { app } = useApplication();
+  const width = app?.renderer?.width ?? 800;
+  const height = app?.renderer?.height ?? 600;
 
-  const draw = useCallback((g: Graphics) => {
-    g.clear()
+  const draw = useCallback(
+    (g: Graphics) => {
+      g.clear();
 
-    const bands = [
-      { color: 0x1A0E3A, h: 40 },
-      { color: 0x2D1B5E, h: 35 },
-      { color: 0x5B1F7A, h: 35 },
-      { color: 0x8B2080, h: 30 },
-      { color: 0xBE2060, h: 30 },
-      { color: 0xD93828, h: 30 },
-      { color: 0xE85020, h: 28 },
-      { color: 0xF06818, h: 28 },
-      { color: 0xF58018, h: 26 },
-      { color: 0xF9A020, h: 26 },
-      { color: 0xFBB830, h: 24 },
-      { color: 0xFDCC50, h: 22 },
-      { color: 0xFEDA70, h: 20 },
-      { color: 0xFEE890, h: 18 },
-      { color: 0xFFF0B0, h: 16 },
-    ]
+      const bands = [
+        // { color: 0x1a0e3a, h: 30 },
+        { color: 0x2d1b5e, h: 26 },
+        { color: 0x5b1f7a, h: 24 },
+        { color: 0x8b2080, h: 20 },
+        { color: 0xbe2060, h: 18 },
+        // { color: 0xd93828, h: 18 },
+        { color: 0xe85020, h: 17 },
+        { color: 0xf06818, h: 16 },
+        { color: 0xf58018, h: 14 },
+        // { color: 0xf9a020, h: 6 },
+        { color: 0xfbb830, h: 12 },
+        { color: 0xfdcc50, h: 10 },
+        { color: 0xfeda70, h: 8 },
+        // { color: 0xfee890, h: 13 },
+        // { color: 0xfff0b0, h: 12 },
+        // { color: 0xfff0b0, h: 12 },
+        // { color: 0xfff0b0, h: 12 },
+        // { color: 0xfff0b0, h: 12 },
+        { color: 0xfff0b0, h: 130 },
+      ];
 
-    const totalBandHeight = bands.reduce((s, b) => s + b.h, 0)
-    const scaleFactor = height / totalBandHeight
+      const totalH = bands.reduce((s, b) => s + b.h, 0);
+      const scale = height / totalH;
 
-    let currentY = 0
-    for (const band of bands) {
-      const h = Math.max(1, Math.round(band.h * scaleFactor))
-      g.setFillStyle({ color: band.color })
-      g.drawRect(0, currentY, width, h)
-      g.fill()
-      currentY += h
-    }
+      let currentY = 0;
+      for (let i = 0; i < bands.length; i++) {
+        const band = bands[i];
+        let h = Math.max(1, Math.round(band.h * scale));
+        if (i === bands.length - 1) h = Math.max(1, height - currentY);
+        g.setFillStyle({ color: band.color });
+        g.drawRect(0, currentY, width, h);
+        g.fill();
+        currentY += h;
+      }
+    },
+    [width, height],
+  );
 
-  }, [width, height])
+  const drawSun = useCallback(
+    (g: Graphics) => {
+      g.clear();
 
-  const drawSun = useCallback((g: Graphics) => {
-    g.clear()
+      const P = 8;
+      const cx = Math.round(width * 0.42);
+      const cy = Math.round(height * 0.56);
 
-    const P = 8  // pixel block size
-    // position sun center — horizontally centered, low in sky near horizon
-    const cx = Math.round(width * 0.5)
-    const cy = Math.round(height * 0.55)
-
-    // sun glow (outermost, faint yellow)
-    const glowCells = [
-      [0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],
-      [0,1],[6,1],
-      [0,2],[6,2],
-      [0,3],[6,3],
-      [0,4],[6,4],
-      [0,5],[6,5],
-      [0,6],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],
-    ]
-    for (const [col, row] of glowCells) {
-      g.rect(cx + (col - 3) * P, cy + (row - 3) * P, P, P)
-    }
-    g.fill(0xFFF5C0)
-
-    // sun body (bright white-yellow)
-    const bodyRows = [
-      [0,0,1,1,1,0,0],
-      [0,1,1,1,1,1,0],
-      [1,1,1,1,1,1,1],
-      [1,1,1,1,1,1,1],
-      [1,1,1,1,1,1,1],
-      [0,1,1,1,1,1,0],
-      [0,0,1,1,1,0,0],
-    ]
-    for (let row = 0; row < bodyRows.length; row++) {
-      for (let col = 0; col < bodyRows[row].length; col++) {
-        if (bodyRows[row][col] === 1) {
-          g.rect(cx + (col - 3) * P, cy + (row - 3) * P, P, P)
+      const haloRadius = 6 * P;
+      for (let oy = -haloRadius; oy <= haloRadius; oy += P) {
+        for (let ox = -haloRadius; ox <= haloRadius; ox += P) {
+          const dist = Math.sqrt(ox * ox + oy * oy);
+          if (dist > haloRadius) continue;
+          const factor = 1 - dist / haloRadius;
+          const alpha = Math.max(0, 0.6 * factor);
+          if (alpha < 0.02) continue;
+          g.setFillStyle({ color: 0xfff5c0, alpha });
+          g.drawRect(cx + ox, cy + oy, P, P);
+          g.fill();
         }
       }
-    }
-    g.fill(0xFFE060)
 
-    // sun core (brightest center)
-    const coreCells = [
-      [2,2],[3,2],[4,2],
-      [2,3],[3,3],[4,3],
-      [2,4],[3,4],[4,4],
-    ]
-    for (const [col, row] of coreCells) {
-      g.rect(cx + (col - 3) * P, cy + (row - 3) * P, P, P)
-    }
-    g.fill(0xFFFFCC)
+      g.setFillStyle({ color: 0xffe060 });
+      for (let ry = -1; ry <= 1; ry++) {
+        for (let rx = -1; rx <= 1; rx++) {
+          g.drawRect(cx + rx * P, cy + ry * P, P, P);
+        }
+      }
+      g.drawRect(cx - 2 * P, cy, P, P);
+      g.drawRect(cx + 2 * P, cy, P, P);
+      g.drawRect(cx, cy - 2 * P, P, P);
+      g.drawRect(cx, cy + 2 * P, P, P);
+      g.fill();
 
-    // sun rays (pixel style, 8 directions)
-    const rayColor = 0xFFE060
+      g.setFillStyle({ color: 0xffffcc });
+      g.drawRect(cx, cy, P, P);
+      g.drawRect(cx - P, cy, P, P);
+      g.drawRect(cx + P, cy, P, P);
+      g.drawRect(cx, cy - P, P, P);
+      g.drawRect(cx, cy + P, P, P);
+      g.fill();
+    },
+    [width, height],
+  );
 
-    // top ray
-    g.rect(cx - P/2, cy - 5*P, P, P)
-    g.fill(rayColor)
+  const drawClouds = useCallback(
+    (g: Graphics) => {
+      g.clear();
 
-    // bottom ray
-    g.rect(cx - P/2, cy + 4*P, P, P)
-    g.fill(rayColor)
+      const P = 8;
 
-    // left ray
-    g.rect(cx - 5*P, cy - P/2, P, P)
-    g.fill(rayColor)
+      const drawCloud = (cx: number, cy: number) => {
+        g.rect(cx + P, cy - P * 2, P * 3, P);
+        g.rect(cx, cy - P, P * 5, P);
+        g.rect(cx - P, cy, P * 7, P);
+        g.rect(cx, cy + P, P * 5, P);
+      };
 
-    // right ray
-    g.rect(cx + 4*P, cy - P/2, P, P)
-    g.fill(rayColor)
+      drawCloud(Math.round(width * 0.13), Math.round(height * 0.16));
+      drawCloud(Math.round(width * 0.68), Math.round(height * 0.22));
 
-    // top-left ray
-    g.rect(cx - 4*P, cy - 4*P, P, P)
-    g.fill(rayColor)
-
-    // top-right ray
-    g.rect(cx + 3*P, cy - 4*P, P, P)
-    g.fill(rayColor)
-
-    // bottom-left ray
-    g.rect(cx - 4*P, cy + 3*P, P, P)
-    g.fill(rayColor)
-
-    // bottom-right ray
-    g.rect(cx + 3*P, cy + 3*P, P, P)
-    g.fill(rayColor)
-
-  }, [width, height])
-
-  const drawClouds = useCallback((g: Graphics) => {
-    g.clear()
-
-    const P = 8
-
-    const drawCloud = (cx: number, cy: number) => {
-      g.rect(cx + P,  cy - P * 2, P * 3, P)
-      g.rect(cx,      cy - P,     P * 5, P)
-      g.rect(cx - P,  cy,         P * 7, P)
-      g.rect(cx,      cy + P,     P * 5, P)
-    }
-
-    drawCloud(Math.round(width * 0.13), Math.round(height * 0.16))
-    drawCloud(Math.round(width * 0.68), Math.round(height * 0.22))
-
-    g.fill(0xF0C8D8)
-
-  }, [width, height])
+      g.fill(0xf0c8d8);
+    },
+    [width, height],
+  );
 
   return (
     <>
       <pixiGraphics draw={draw} x={0} y={0} />
-      <pixiGraphics draw={drawSun} x={10} y={-200} />
+      <pixiGraphics draw={drawSun} x={0} y={-100} />
       <pixiGraphics draw={drawClouds} x={0} y={0} />
     </>
-  )
+  );
 }
