@@ -3,18 +3,16 @@
 import { useMemo } from "react";
 import { useApplication } from "@pixi/react";
 import Flower from "./flower";
-import GrassBlade from "./grass_blade";
+import GrassTuft from "./grass_blade";
 import Ground from "./ground";
 
-const GRASS_COLORS = [0x3a7018, 0x2c5c10, 0x488020, 0x345810];
 const FLOWER_COLORS = [0xff6090, 0xff80a8, 0x80c0ff, 0xffb0e0, 0xffd040];
 
 interface GrassFieldProps {
   renderGround?: boolean;
-  groundY?: number; // pass the same y trees sit on, so everything lines up
+  groundY?: number;
 }
 
-// deterministic seeded PRNG so layout is stable across re-renders
 function mulberry32(seed: number) {
   return function () {
     seed |= 0;
@@ -25,6 +23,17 @@ function mulberry32(seed: number) {
   };
 }
 
+type FieldItem =
+  | { kind: "tuft"; x: number; y: number; depth: number; variant: number }
+  | {
+      kind: "flower";
+      x: number;
+      y: number;
+      depth: number;
+      scale: number;
+      petalColor: number;
+    };
+
 export default function GrassField({
   renderGround = true,
   groundY,
@@ -33,100 +42,111 @@ export default function GrassField({
   const width = app?.renderer?.width ?? 800;
   const height = app?.renderer?.height ?? 600;
 
-  // field band: starts at the tree/horizon line, runs to near the bottom
   const fieldTop = groundY ?? height * 0.56;
   const fieldBottom = height * 0.97;
+  const fieldHeight = fieldBottom - fieldTop;
 
-  const bladeCount = Math.max(80, Math.floor(width / 5));
-  const flowerCount = Math.max(14, Math.floor(width / 45));
-
-  const grassBlades = useMemo(() => {
+  const fieldItems = useMemo(() => {
     const rand = mulberry32(1337);
-    const blades: { x: number; y: number; height: number; color: number }[] =
-      [];
+    const items: FieldItem[] = [];
 
-    // depth bands from back (0) to front (1), each with its own share of
-    // the total count and its own size range — guarantees coverage everywhere
-    const bands = [
-      { depthRange: [0.0, 0.25], share: 0.18 }, // far back: sparse, small
-      { depthRange: [0.25, 0.5], share: 0.22 },
-      { depthRange: [0.5, 0.75], share: 0.28 },
-      { depthRange: [0.75, 1.0], share: 0.32 }, // front: densest, biggest
+    const cols = Math.max(10, Math.floor(width / 72));
+    const rows = Math.max(5, Math.floor(fieldHeight / 52));
+    const cellW = width / cols;
+    const cellH = fieldHeight / rows;
+
+    const depthBands = [
+      { rowStart: 0, rowEnd: Math.floor(rows * 0.3), chance: 0.28 },
+      { rowStart: Math.floor(rows * 0.3), rowEnd: Math.floor(rows * 0.6), chance: 0.42 },
+      { rowStart: Math.floor(rows * 0.6), rowEnd: rows, chance: 0.58 },
     ];
 
-    for (const band of bands) {
-      const count = Math.round(bladeCount * band.share);
-      const [dMin, dMax] = band.depthRange;
-      for (let i = 0; i < count; i++) {
-        const depth = dMin + rand() * (dMax - dMin);
-        const y = fieldTop + depth * (fieldBottom - fieldTop);
-        blades.push({
-          x: Math.round(rand() * width),
-          y: Math.round(y),
-          height: Math.round(6 + depth * 26 + rand() * 5),
-          color: GRASS_COLORS[Math.floor(rand() * GRASS_COLORS.length)],
-        });
+    let variant = 0;
+    const centerX = width * 0.5;
+    const excludeHalfW = width * 0.16;
+    const excludeTopY = fieldBottom - fieldHeight * 0.24;
+
+    const inClearZone = (x: number, y: number) =>
+      Math.abs(x - centerX) < excludeHalfW && y > excludeTopY;
+
+    for (const band of depthBands) {
+      for (let row = band.rowStart; row < band.rowEnd; row++) {
+        for (let col = 0; col < cols; col++) {
+          if (rand() > band.chance) continue;
+
+          const depth = (row + rand() * 0.6) / rows;
+          const x = Math.round(col * cellW + cellW * 0.2 + rand() * cellW * 0.6);
+          const y = Math.round(
+            fieldTop + row * cellH + cellH * 0.25 + rand() * cellH * 0.5,
+          );
+
+          if (inClearZone(x, y)) continue;
+
+          items.push({ kind: "tuft", x, y, depth, variant: variant++ });
+        }
       }
     }
 
-    return blades;
-  }, [bladeCount, width, fieldTop, fieldBottom]);
+    const flowerRand = mulberry32(4242);
+    const flowerSlots = Math.max(5, Math.floor(width / 140));
+    const placedFlowers: { x: number; y: number }[] = [];
 
-  const flowers = useMemo(() => {
-    const rand = mulberry32(4242);
-    const result: {
-      x: number;
-      y: number;
-      scale: number;
-      petalColor: number;
-    }[] = [];
+    for (let i = 0; i < flowerSlots; i++) {
+      let placed = false;
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const depth = 0.35 + flowerRand() * 0.55;
+        const x = Math.round(60 + flowerRand() * (width - 120));
+        const y = Math.round(fieldTop + depth * fieldHeight);
 
-    const bands = [
-      { depthRange: [0.0, 0.3], share: 0.2 },
-      { depthRange: [0.3, 0.6], share: 0.3 },
-      { depthRange: [0.6, 1.0], share: 0.5 },
-    ];
-
-    for (const band of bands) {
-      const count = Math.max(1, Math.round(flowerCount * band.share));
-      const [dMin, dMax] = band.depthRange;
-      for (let i = 0; i < count; i++) {
-        const depth = dMin + rand() * (dMax - dMin);
-        const y = fieldTop + depth * (fieldBottom - fieldTop);
-        result.push({
-          x: Math.round(rand() * width),
-          y: Math.round(y),
-          scale: 0.6 + depth * 0.7,
-          petalColor: FLOWER_COLORS[Math.floor(rand() * FLOWER_COLORS.length)],
+        const tooClose = placedFlowers.some((f) => {
+          const dx = f.x - x;
+          const dy = f.y - y;
+          return dx * dx + dy * dy < 110 * 110;
         });
+        if (tooClose || inClearZone(x, y)) continue;
+
+        placedFlowers.push({ x, y });
+        items.push({
+          kind: "flower",
+          x,
+          y,
+          depth,
+          scale: 0.55 + depth * 0.55,
+          petalColor:
+            FLOWER_COLORS[Math.floor(flowerRand() * FLOWER_COLORS.length)],
+        });
+        placed = true;
+        break;
       }
+      if (!placed) break;
     }
 
-    return result;
-  }, [flowerCount, width, fieldTop, fieldBottom]);
+    return items.sort((a, b) => a.y - b.y);
+  }, [width, fieldTop, fieldHeight]);
 
   return (
     <>
       {renderGround && <Ground width={width} height={height} />}
 
-      {grassBlades.map((blade, i) => (
-        <GrassBlade
-          key={i}
-          x={blade.x}
-          y={blade.y}
-          height={blade.height}
-          color={blade.color}
-        />
-      ))}
-
-      {flowers.map((flower, i) => (
-        <Flower
-          key={i}
-          x={flower.x}
-          y={flower.y}
-          petalColor={flower.petalColor}
-        />
-      ))}
+      {fieldItems.map((item, i) =>
+        item.kind === "tuft" ? (
+          <GrassTuft
+            key={`tuft-${item.x}-${item.y}-${item.variant}`}
+            x={item.x}
+            y={item.y}
+            depth={item.depth}
+            variant={item.variant}
+          />
+        ) : (
+          <Flower
+            key={`flower-${item.x}-${item.y}`}
+            x={item.x}
+            y={item.y}
+            scale={item.scale}
+            petalColor={item.petalColor}
+          />
+        ),
+      )}
     </>
   );
 }
