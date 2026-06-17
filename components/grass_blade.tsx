@@ -1,8 +1,8 @@
 'use client'
 
-import { extend } from '@pixi/react'
+import { extend, useApplication } from '@pixi/react'
 import { Graphics } from 'pixi.js'
-import { useCallback } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 
 extend({ Graphics })
 
@@ -26,7 +26,59 @@ function mulberry32(seed: number) {
   }
 }
 
+// Asymmetric wind curve: fast snap toward the left (negative), slow elastic return.
+function windCurve(phase: number) {
+  const p = ((phase % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)
+  const s = Math.sin(p)
+  if (s >= 0) {
+    return -Math.pow(s, 2) * 0.35
+  }
+  return -Math.pow(-s, 0.7)
+}
+
 export default function GrassTuft({ x, y, depth, variant }: GrassTuftProps) {
+  const graphicsRef = useRef<Graphics | null>(null)
+  const { app } = useApplication()
+  const timeRef = useRef(0)
+
+  useEffect(() => {
+    if (!app || !(app as any).ticker) return
+
+    const baseX = x
+    const width = app?.renderer?.width ?? 800
+
+    const baseAmp = 9
+    // Wave speed: how fast the gust travels across the field, in px/sec.
+    const travelSpeed = 220
+    const gustSpeed = 2.0
+
+    const tick = (delta: any) => {
+      const dt = typeof delta === 'number' ? delta / 60 : (delta.deltaTime ?? delta.delta ?? 16) / 1000
+      timeRef.current += dt
+
+      // Phase offset based on x position: right side leads, left side lags,
+      // so the bend visibly travels from right to left across the field.
+      const travelPhase = (baseX / travelSpeed) * gustSpeed
+
+      const sideFactor = 1 - Math.min(Math.max(baseX / width, 0), 1)
+      const amplitude = baseAmp * (0.35 + sideFactor * 1.2) * (0.5 + depth * 0.5)
+      const speed = gustSpeed + sideFactor * 0.6
+
+      // variant adds slight per-tuft desync so it doesn't look perfectly mechanical
+      const phase = timeRef.current * speed - travelPhase + variant * 0.15
+
+      const sway = windCurve(phase) * amplitude
+
+      if (graphicsRef.current) graphicsRef.current.position.set(baseX + sway, y)
+    }
+
+    app.ticker.add(tick as any)
+    return () => {
+      app.ticker.remove(tick as any)
+      if (graphicsRef.current) graphicsRef.current.position.set(baseX, y)
+    }
+  }, [app, x, variant, depth])
+
   const draw = useCallback((g: Graphics) => {
     g.clear()
 
@@ -34,12 +86,10 @@ export default function GrassTuft({ x, y, depth, variant }: GrassTuftProps) {
     const alpha = 0.5 + depth * 0.5
     const baseH = Math.round(7 + depth * 24)
 
-    // choose single-blade with ~60% probability
     const singleBladeRoll = rand()
     let blades = [] as { ox: number; h: number; w: number }[]
 
     if (singleBladeRoll < 0.6) {
-      // single tall blade centered
       blades = [
         { ox: 0, h: Math.round(baseH * (1.05 + rand() * 0.25)), w: 3 },
       ]
@@ -74,5 +124,5 @@ export default function GrassTuft({ x, y, depth, variant }: GrassTuftProps) {
     }
   }, [depth, variant])
 
-  return <pixiGraphics draw={draw} x={x} y={y} />
+  return <pixiGraphics ref={graphicsRef} draw={draw} x={x} y={y} />
 }
