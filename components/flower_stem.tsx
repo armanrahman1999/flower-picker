@@ -55,7 +55,7 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     // ── OUTER DARK PINK RING (outermost petal edges) ──
 
     // ── MAIN PETAL BODY (bright pink) ──
-    const mainPink = 0xff7fa3;
+    const mainPink = 0xff75a0;
     const midPink = 0xff6090;
     // const lightPink = 0xd987a2;
     // top petal block
@@ -98,18 +98,6 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     g.drawRect(fx - 1.4 * S, fy + 2.6 * S, 2.8 * S, 1.5 * S);
     g.fill();
 
-    // ── INNER LIGHT PINK (petal highlight/inner ring) ──
-
-    // top inner
-    // g.setFillStyle({ color: lightPink });
-    // g.drawRect(fx - S, fy - 4 * S, 2 * S, S);
-    // g.fill();
-    // // left inner
-    // g.drawRect(fx - 4 * S, fy - S, S, 2 * S);
-    // g.fill();
-    // // right inner
-    // g.drawRect(fx + 3 * S, fy - S, S, 2 * S);
-    // g.fill();
     const lightYellow = 0xffdc58;
     const darkYellow = 0xffd040;
     const darkrYellow = 0xfac838;
