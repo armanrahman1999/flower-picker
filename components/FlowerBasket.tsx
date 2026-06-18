@@ -141,19 +141,20 @@ export default function FlowerBasket() {
           style={{ imageRendering: "pixelated" }}
         >
           {/* handle, behind the basket body */}
+          {/* boxy handle composed of straight segments for a pixel-art look */}
           <path
-            d="M14 24 C14 6, 86 6, 86 24"
+            d="M14 24 L14 10 L86 10 L86 24"
             stroke="#3d2410"
             strokeWidth="5"
             fill="none"
-            strokeLinecap="square"
+            strokeLinecap="butt"
           />
           <path
-            d="M14 24 C14 9, 86 9, 86 24"
+            d="M14 24 L14 12 L86 12 L86 24"
             stroke="#6e4114"
             strokeWidth="2"
             fill="none"
-            strokeLinecap="square"
+            strokeLinecap="butt"
           />
 
           {/* flowers sitting inside, drawn before the front rim so the
@@ -181,9 +182,8 @@ export default function FlowerBasket() {
             y="26"
             width="80"
             height="30"
-            rx="3"
             fill="#7a4d22"
-            stroke="#1a0d04"
+            stroke="#3d2410"
             strokeWidth="3"
           />
           {/* woven texture: alternating light/dark vertical slats */}
@@ -220,9 +220,8 @@ export default function FlowerBasket() {
             y="26"
             width="80"
             height="7"
-            rx="3"
             fill="#5c3a1a"
-            stroke="#1a0d04"
+            stroke="#3d2410"
             strokeWidth="3"
           />
         </svg>
