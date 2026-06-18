@@ -2,7 +2,7 @@
 
 import React, { useCallback } from "react";
 import { MdRefresh } from "react-icons/md";
-import { Howler } from "howler";
+import { resetMusicAfterClear } from "../lib/musicEngine";
 
 const BASKET_KEY = "flowerPickStack";
 const MUSIC_KEY = "musicPlaying";
@@ -18,7 +18,7 @@ export default function ResetButton() {
     try { window.localStorage.removeItem(MUSIC_KEY); } catch {}
     try { window.localStorage.removeItem(TRANSITION_KEY); } catch {}
 
-    try { Howler.stop(); Howler.mute(false); } catch {}
+    try { resetMusicAfterClear(); } catch {}
 
     try { window.dispatchEvent(new CustomEvent("flowerBasketReset")); } catch {}
     try { window.dispatchEvent(new CustomEvent("musicReset")); } catch {}

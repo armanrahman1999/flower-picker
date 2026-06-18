@@ -12,7 +12,6 @@ import FlowerBasket from "./FlowerBasket";
 import ResetButton from "./ResetButton";
 import InstructionBox from "./InstructionBox";
 import Hand from "./hand";
-import MusicPlayer from "./MusicPlayer";
 import ScreenBushes from "./double_bush";
 import BushSingle from "./bush";
 
@@ -83,7 +82,6 @@ export default function PixiScene() {
             <BushSingle x={size.width * 0.9} y={size.height * 0.68} width={60} height={20} />
             <BushSingle x={size.width * 0.7} y={size.height * .6} width={70} height={20} />
           </Application>
-          <MusicPlayer  />
         </>
       )}
     </div>

@@ -1,122 +1,76 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Howl, Howler } from "howler";
+import {
+  isMusicPlaying,
+  pauseMusic,
+  resumeAndPlay,
+  resumeMusic,
+} from "../lib/musicEngine";
 
-const SRC = encodeURI("/Anemone Symphony.mp3");
 const STORAGE_KEY = "musicPlaying";
 
 export default function MusicPlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [desiredPlay, setDesiredPlay] = useState<boolean>(() => {
-    try {
-      if (typeof window === "undefined") return true;
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      return stored === null ? true : stored === "true";
-    } catch {
-      return true;
-    }
-  });
-  const howl = useMemo(() => {
-    return new Howl({
-      src: [SRC],
-      loop: true,
-      volume: 0.6,
-      onplay: () => {},
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const userPausedRef = useRef(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
-    // Ensure global Howler is unmuted and audio context is ready on mount
+    userPausedRef.current = false;
+    resumeAndPlay();
     try {
-      Howler.mute(false);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      Howler.ctx?.resume?.();
+      window.localStorage.setItem(STORAGE_KEY, "true");
     } catch {}
-  }, []);
 
-  useEffect(() => {
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onStop = () => setIsPlaying(false);
-
-    howl.on("play", onPlay);
-    howl.on("pause", onPause);
-    howl.on("stop", onStop);
-
-    // If the user previously opted to have music on, attempt to resume.
-    if (desiredPlay) {
-      try {
-        howl.play();
-      } catch (err) {
-        // ignore; user can toggle to start
-        // keep a console hint for debugging
-        // eslint-disable-next-line no-console
-        console.debug("MusicPlayer: autoplay attempt failed", err);
+    const sync = () => {
+      if (userPausedRef.current) {
+        setIsPlaying(isMusicPlaying());
+        return;
       }
-    }
-
-    return () => {
-      howl.off("play", onPlay);
-      howl.off("pause", onPause);
-      howl.off("stop", onStop);
-      howl.unload();
+      setIsPlaying(true);
+      if (!isMusicPlaying()) {
+        resumeAndPlay();
+      }
     };
-  }, [howl, desiredPlay]);
 
-  // Respond to external reset requests (clear storage and stop playback)
-  useEffect(() => {
+    const interval = window.setInterval(sync, 300);
+    sync();
+
     const handleReset = () => {
-      try {
-        howl.stop();
-      } catch {}
-      try {
-        setIsPlaying(false);
-      } catch {}
-      try {
-        setDesiredPlay(false);
-      } catch {}
+      userPausedRef.current = false;
+      resumeAndPlay();
+      setIsPlaying(true);
       try {
         window.localStorage.removeItem(STORAGE_KEY);
       } catch {}
     };
     window.addEventListener("musicReset", handleReset as EventListener);
-    return () =>
+
+    return () => {
+      window.clearInterval(interval);
       window.removeEventListener("musicReset", handleReset as EventListener);
-  }, [howl]);
+    };
+  }, []);
 
   const toggle = useCallback(() => {
-    if (isPlaying) {
-      howl.pause();
-      setIsPlaying(false);
-      setDesiredPlay(false);
+    if (userPausedRef.current) {
+      userPausedRef.current = false;
+      resumeMusic();
+      setIsPlaying(true);
       try {
-        window.localStorage.setItem(STORAGE_KEY, "false");
+        window.localStorage.setItem(STORAGE_KEY, "true");
       } catch {}
-    } else {
-      try {
-        try {
-          Howler.mute(false);
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          Howler.ctx?.resume?.();
-        } catch {}
-        howl.play();
-        // actual isPlaying will be set by Howler's onplay handler
-        setDesiredPlay(true);
-        try {
-          window.localStorage.setItem(STORAGE_KEY, "true");
-        } catch {}
-      } catch {
-        // ignore
-      }
+      return;
     }
-  }, [howl, isPlaying]);
 
-  // Render control into a portal to guarantee it's plain DOM outside Pixi's tree.
+    pauseMusic();
+    userPausedRef.current = true;
+    setIsPlaying(false);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, "false");
+    } catch {}
+  }, []);
+
   const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -162,7 +116,6 @@ export default function MusicPlayer() {
           boxShadow: isPlaying ? "0 6px 0 rgba(0,0,0,0.25)" : "none",
         }}
       >
-        {/* SVG speaker icon: muted (X) when paused, waves when playing */}
         <svg
           width="28"
           height="28"
@@ -171,17 +124,14 @@ export default function MusicPlayer() {
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden
         >
-          {/* speaker body */}
           <path d="M3 9v6h4l5 4V5L7 9H3z" fill="#ffd040" />
 
-          {/* muted: X overlay */}
           {!isPlaying && (
             <g stroke="#ffd040" strokeWidth="2" strokeLinecap="round">
               <path d="M16 8l4 4M20 8l-4 4" />
             </g>
           )}
 
-          {/* playing: three wave arcs */}
           {isPlaying && (
             <g
               stroke="#ffd040"
