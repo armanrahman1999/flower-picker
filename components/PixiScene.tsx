@@ -13,6 +13,8 @@ import ResetButton from "./ResetButton";
 import InstructionBox from "./InstructionBox";
 import Hand from "./hand";
 import MusicPlayer from "./MusicPlayer";
+import ScreenBushes from "./double_bush";
+import BushSingle from "./bush";
 
 extend({ Graphics });
 
@@ -75,8 +77,13 @@ export default function PixiScene() {
             />
             <Hand x={handX} y={handY} />
             <FlowerStem x={handX} y={size.height * 0.7} />
+            <ScreenBushes screenWidth={size.width} screenHeight={size.height + 38} />
+            {/* Test bush: clear position and size */}
+            <BushSingle x={200} y={780} width={100} height={50} />
+            <BushSingle x={900} y={680} width={60} height={20} />
+            <BushSingle x={900} y={1000} width={130} height={60} />
           </Application>
-          <MusicPlayer />
+          <MusicPlayer  />
         </>
       )}
     </div>
