@@ -95,9 +95,9 @@ export default function Sky() {
   // Phase C (progress 0.55 -> 1): sun rises in from the top-right corner and
   // settles centered in the sky, where it stops for good.
   const sunStart = { xf: 0.42, yf: 0.56 };
-  const sunSetTarget = { xf: 0.1, yf: 1.15 };
-  const sunRiseFrom = { xf: 1.08, yf: -0.12 };
-  const sunRiseTarget = { xf: 0.5, yf: 0.42 };
+  const sunSetTarget = { xf: 0.15, yf: 0.92 };
+  const sunRiseFrom = { xf: 1.08, yf: -0.16 };
+  const sunRiseTarget = { xf: 0.5, yf: 0.34 };
 
   // Draws the sky bands for a given progress value directly onto a Graphics
   // instance. Pure function of (g, progress) — no React state involved, so
