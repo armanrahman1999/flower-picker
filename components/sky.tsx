@@ -78,6 +78,7 @@ export default function Sky() {
 
   const skyRef = useRef<Graphics | null>(null);
   const sunRef = useRef<Graphics | null>(null);
+  const transitionRequestedRef = useRef(false);
 
   // Drives the one-shot sunset -> night -> sunrise transition.
   // 0 = starting state (sun up at its original spot, dusk palette).
@@ -220,10 +221,23 @@ export default function Sky() {
     const cloudAmplitude = Math.max(32, width * 0.12);
     const cloudSpeed = 0.14;
 
+    const storedDone = window.localStorage.getItem("flowerStemSkyTransitionDone") === "true";
+    if (storedDone) {
+      transitionRequestedRef.current = true;
+      cycleProgressRef.current = 1;
+      cycleDoneRef.current = true;
+    }
+
     // Paint the very first frame immediately so the scene isn't blank while
     // waiting for the first ticker callback.
     if (skyRef.current) drawSkyAtProgress(skyRef.current, cycleProgressRef.current);
     if (sunRef.current) drawSunAtProgress(sunRef.current, cycleProgressRef.current);
+
+    const onTransitionRequested = () => {
+      if (!cycleDoneRef.current) transitionRequestedRef.current = true;
+    };
+
+    window.addEventListener("flowerSkyTransitionRequested", onTransitionRequested);
 
     const tick = (delta: any) => {
       const dt = typeof delta === "number" ? delta / 60 : (delta.deltaTime ?? delta.delta ?? 16) / 1000;
@@ -232,7 +246,7 @@ export default function Sky() {
       const offset = -Math.sin(cloudTimeRef.current * cloudSpeed) * cloudAmplitude;
       if (cloudRef.current) cloudRef.current.position.set(baseX + offset, 0);
 
-      if (!cycleDoneRef.current) {
+      if (!cycleDoneRef.current && transitionRequestedRef.current) {
         cycleProgressRef.current = Math.min(1, cycleProgressRef.current + dt / CYCLE_DURATION);
         if (skyRef.current) drawSkyAtProgress(skyRef.current, cycleProgressRef.current);
         if (sunRef.current) drawSunAtProgress(sunRef.current, cycleProgressRef.current);
@@ -243,6 +257,7 @@ export default function Sky() {
     (app as any).ticker.add(tick as any);
     return () => {
       (app as any).ticker.remove(tick as any);
+      window.removeEventListener("flowerSkyTransitionRequested", onTransitionRequested);
       if (cloudRef.current) cloudRef.current.position.set(baseX, 0);
     };
   }, [app, width, drawSkyAtProgress, drawSunAtProgress]);
