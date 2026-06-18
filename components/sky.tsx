@@ -87,7 +87,7 @@ export default function Sky() {
   const cycleDoneRef = useRef(false);
 
   // Total duration of the whole sunset -> night -> sunrise transition, seconds.
-  const CYCLE_DURATION = 14;
+  const CYCLE_DURATION = 14 / 5;
 
   // --- Sun position keyframes (fractions of screen width/height) --------
   // Phase A (progress 0 -> 0.45): sun sinks down toward the bottom-left, fading out.
@@ -203,6 +203,16 @@ export default function Sky() {
     [width, height, drawSunShape],
   );
 
+  const drawSky = useCallback(
+    (g: Graphics) => drawSkyAtProgress(g, cycleProgressRef.current),
+    [drawSkyAtProgress],
+  );
+
+  const drawSun = useCallback(
+    (g: Graphics) => drawSunAtProgress(g, cycleProgressRef.current),
+    [drawSunAtProgress],
+  );
+
   useEffect(() => {
     if (!app || !(app as any).ticker) return;
 
@@ -280,8 +290,8 @@ export default function Sky() {
 
   return (
     <>
-      <pixiGraphics ref={skyRef} x={0} y={0} />
-      <pixiGraphics ref={sunRef} x={0} y={-100} />
+      <pixiGraphics ref={skyRef} draw={drawSky} x={0} y={0} />
+      <pixiGraphics ref={sunRef} draw={drawSun} x={0} y={-100} />
       <pixiGraphics ref={cloudRef} draw={drawClouds} x={0} y={0} />
     </>
   );
