@@ -11,6 +11,8 @@ interface FlowerStemProps {
   y: number;
 }
 
+const TRANSITION_STORAGE_KEY = "flowerStemSkyTransitionDone";
+
 export default function FlowerStem({ x, y }: FlowerStemProps) {
   const [visible, setVisible] = useState(true);
   const pickedRef = useRef(false);
@@ -26,6 +28,13 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
 
   const handlePointerDown = useCallback(() => {
     if (pickedRef.current) return;
+
+    const alreadyDone = window.localStorage.getItem(TRANSITION_STORAGE_KEY) === "true";
+    if (!alreadyDone) {
+      window.localStorage.setItem(TRANSITION_STORAGE_KEY, "true");
+      window.dispatchEvent(new Event("flowerSkyTransitionRequested"));
+    }
+
     pickedRef.current = true;
     setVisible(false);
     if (timerRef.current) clearTimeout(timerRef.current);
