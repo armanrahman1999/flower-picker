@@ -146,24 +146,24 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
       g.drawRect(0, -STEM_UNITS * P, P, STEM_UNITS * P);
       g.fill();
 
-      // left leaf
+      // left leaf (bigger)
       g.setFillStyle({ color: 0x3a7820 });
-      g.drawRect(-4 * P, -10 * P, 3 * P, P);
+      g.drawRect(-5 * P, -10 * P, 4 * P, 1.5 * P);
       g.fill();
-      g.drawRect(-5 * P, -11 * P, 3 * P, P);
+      g.drawRect(-6 * P, -11.5 * P, 4 * P, 1.5 * P);
       g.fill();
       g.setFillStyle({ color: 0x4a8828 });
-      g.drawRect(-4 * P, -11 * P, 2 * P, P);
+      g.drawRect(-5 * P, -11.5 * P, 3 * P, 1.5 * P);
       g.fill();
 
-      // right leaf
+      // right leaf (bigger)
       g.setFillStyle({ color: 0x3a7820 });
-      g.drawRect(P, -14 * P, 3 * P, P);
+      g.drawRect(P, -14 * P, 4 * P, 1.5 * P);
       g.fill();
-      g.drawRect(2 * P, -15 * P, 3 * P, P);
+      g.drawRect(2 * P, -15.5 * P, 4 * P, 1.5 * P);
       g.fill();
       g.setFillStyle({ color: 0x4a8828 });
-      g.drawRect(2 * P, -14 * P, 2 * P, P);
+      g.drawRect(2 * P, -15.5 * P, 3 * P, 1.5 * P);
       g.fill();
 
       // ── FLOWER HEAD ──
