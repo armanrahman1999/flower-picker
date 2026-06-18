@@ -13,8 +13,26 @@ interface FlowerStemProps {
 
 const TRANSITION_STORAGE_KEY = "flowerStemSkyTransitionDone";
 
+// Color palettes for the flower head. Each palette provides main petal,
+// mid petal, outer petal, center dark and center light colors (hex strings).
+const PALETTES: { main: number; mid: number; outer: number; centerDark: number; centerLight: number }[] = [
+  // original
+  { main: 0xff6090, mid: 0xf2548a, outer: 0xe8407a, centerDark: 0xfac838, centerLight: 0xffd040 },
+  // lilac (soft purple)
+  { main: 0xc19bd9, mid: 0xab7fd0, outer: 0x8f5fbf, centerDark: 0xffe28a, centerLight: 0xfff2b8 },
+  // sky blue
+  { main: 0x8fc7ec, mid: 0x6fb7e8, outer: 0x4f9fd8, centerDark: 0xffe28a, centerLight: 0xfff2b8 },
+  // sunny yellow
+  { main: 0xffe080, mid: 0xffd040, outer: 0xf4b030, centerDark: 0xd88b1a, centerLight: 0xfff2b8 },
+  // burgundy
+  { main: 0x8b1f3f, mid: 0xa12a4f, outer: 0x7a1836, centerDark: 0xffd040, centerLight: 0xffdc58 },
+  // magenta
+  { main: 0xff3fa8, mid: 0xff2f9a, outer: 0xe81f86, centerDark: 0xffd040, centerLight: 0xfff2b8 },
+];
+
 export default function FlowerStem({ x, y }: FlowerStemProps) {
   const [visible, setVisible] = useState(true);
+  const [paletteIndex, setPaletteIndex] = useState<number>(0);
   const pickedRef = useRef(false);
   const timerRef = useRef<number | null>(null);
   // HEAD_SCALE 1.5 petals extend ~±75px; previous ±60 area missed outer petals
@@ -49,6 +67,14 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
       pickedRef.current = false;
+      // pick a new random palette index when the stem returns
+      setPaletteIndex((prev) => {
+        const n = PALETTES.length;
+        if (n <= 1) return prev;
+        let next = Math.floor(Math.random() * n);
+        if (next === prev) next = (next + 1) % n;
+        return next;
+      });
       setVisible(true);
     }, 4000);
   }, []);
@@ -98,10 +124,8 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
 
     // ── OUTER DARK PINK RING (outermost petal edges) ──
 
-    // ── MAIN PETAL BODY (bright pink) ──
-    const mainPink = 0xff6090;
-    const midPink = 0xf2548a;
-    // const lightPink = 0xd987a2;
+    // ── MAIN PETAL BODY (palette colors) ──
+    const { main: mainPink, mid: midPink, outer: outerPink, centerDark, centerLight } = PALETTES[paletteIndex];
     // top petal block
     g.setFillStyle({ color: mainPink });
     g.drawRect(fx - 2 * S, fy - 4.8 * S, 4 * S, 1.7 * S);
@@ -129,8 +153,6 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
 
     // outa layer ///
 
-    const outerPink = 0xe8407a;
-
     g.setFillStyle({ color: outerPink });
     // use center-based values and mirror left/right for perfect symmetry
     const outerCols = [
@@ -152,9 +174,9 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     g.drawRect(fx - 1.4 * S, fy + 2.6 * S, 2.8 * S, 1.5 * S);
     g.fill();
 
-    const lightYellow = 0xffdc58;
-    const darkYellow = 0xffd040;
-    const darkrYellow = 0xfac838;
+    const lightYellow = centerLight;
+    const darkYellow = centerDark;
+    const darkrYellow = centerDark;
     // ── BIG SQUARE YELLOW CENTER ──
     g.setFillStyle({ color: darkrYellow });
     g.drawRect(fx - 2.5 * S, fy - 3.8 * S, 5 * S, 5 * S);
@@ -190,7 +212,7 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
         g.fill();
       }
     }
-  }, []);
+  }, [paletteIndex]);
 
   return (
     <pixiGraphics

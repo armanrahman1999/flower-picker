@@ -89,12 +89,16 @@ export default function Flower({
     const gRef = graphicsRef.current;
     return () => {
       ticker.remove(tick as unknown as (d: number) => void);
-      if (gRef) {
-        gRef.position.set(baseX, y);
-        gRef.rotation = 0;
+      try {
+        if (gRef && gRef.position && typeof gRef.position.set === "function") {
+          gRef.position.set(baseX, y);
+          gRef.rotation = 0;
+        }
+      } catch {
+        // ignore cleanup errors when Graphics is partially destroyed
       }
     };
-  }, [app, x, scale]);
+  }, [app, x, scale, y]);
 
   const draw = useCallback(
     (g: Graphics) => {

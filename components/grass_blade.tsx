@@ -91,7 +91,14 @@ export default function GrassTuft({ x, y, depth, variant }: GrassTuftProps) {
     ticker.add(tick as unknown as (d: number) => void);
     return () => {
       ticker.remove(tick as unknown as (d: number) => void);
-      if (gRef) gRef.position.set(baseX, y);
+      try {
+        // guard against partially-destroyed Graphics instances
+        if (gRef && gRef.position && typeof gRef.position.set === "function") {
+          gRef.position.set(baseX, y);
+        }
+      } catch {
+        // ignore cleanup errors
+      }
     };
   }, [app, x, variant, depth, y]);
 
