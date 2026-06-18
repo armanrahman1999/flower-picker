@@ -142,7 +142,12 @@ export default function MusicPlayer() {
 
           {/* playing: three wave arcs */}
           {isPlaying && (
-            <g stroke="#ffd040" strokeWidth="1.6" strokeLinecap="round" style={{ transition: "opacity 200ms" }}>
+            <g
+              stroke="#ffd040"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              style={{ transition: "opacity 200ms" }}
+            >
               <path d="M14 9c1 1 1 3 0 4" opacity="1" />
               <path d="M16 7c2 2 2 6 0 8" opacity="0.9" />
               <path d="M18 5c3 3 3 11 0 14" opacity="0.7" />
