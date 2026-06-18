@@ -5,9 +5,18 @@ import { createPortal } from "react-dom";
 import { Howl } from "howler";
 
 const SRC = encodeURI("/Anemone Symphony.mp3");
+const STORAGE_KEY = "musicPlaying";
 
 export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [desiredPlay, setDesiredPlay] = useState<boolean>(() => {
+    try {
+      if (typeof window === "undefined") return false;
+      return window.localStorage.getItem(STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
   const howl = useMemo(() => {
     return new Howl({
       src: [SRC],
@@ -27,11 +36,13 @@ export default function MusicPlayer() {
     howl.on("pause", onPause);
     howl.on("stop", onStop);
 
-    // Try to autoplay — will only succeed if browser allows it.
-    try {
-      howl.play();
-    } catch {
-      // ignore; user can toggle to start
+    // If the user previously opted to have music on, attempt to resume.
+    if (desiredPlay) {
+      try {
+        howl.play();
+      } catch {
+        // ignore; user can toggle to start
+      }
     }
 
     return () => {
@@ -46,10 +57,18 @@ export default function MusicPlayer() {
     if (isPlaying) {
       howl.pause();
       setIsPlaying(false);
+      setDesiredPlay(false);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, "false");
+      } catch {}
     } else {
       try {
         howl.play();
-        setIsPlaying(true);
+        // actual isPlaying will be set by Howler's onplay handler
+        setDesiredPlay(true);
+        try {
+          window.localStorage.setItem(STORAGE_KEY, "true");
+        } catch {}
       } catch {
         // ignore
       }
@@ -102,41 +121,34 @@ export default function MusicPlayer() {
           boxShadow: isPlaying ? "0 6px 0 rgba(0,0,0,0.25)" : "none",
         }}
       >
-        <div style={{ display: "inline-block" }} aria-hidden>
-          <span
-            style={{
-              display: "inline-block",
-              width: 6,
-              margin: "0 2px",
-              background: "#ffd040",
-              verticalAlign: "bottom",
-              height: isPlaying ? 20 : 8,
-              transition: "height 160ms linear",
-            }}
-          />
-          <span
-            style={{
-              display: "inline-block",
-              width: 6,
-              margin: "0 2px",
-              background: "#ffd040",
-              verticalAlign: "bottom",
-              height: isPlaying ? 18 : 8,
-              transition: "height 160ms linear",
-            }}
-          />
-          <span
-            style={{
-              display: "inline-block",
-              width: 6,
-              margin: "0 2px",
-              background: "#ffd040",
-              verticalAlign: "bottom",
-              height: isPlaying ? 16 : 8,
-              transition: "height 160ms linear",
-            }}
-          />
-        </div>
+        {/* SVG speaker icon: muted (X) when paused, waves when playing */}
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden
+        >
+          {/* speaker body */}
+          <path d="M3 9v6h4l5 4V5L7 9H3z" fill="#ffd040" />
+
+          {/* muted: X overlay */}
+          {!isPlaying && (
+            <g stroke="#ffd040" strokeWidth="2" strokeLinecap="round">
+              <path d="M16 8l4 4M20 8l-4 4" />
+            </g>
+          )}
+
+          {/* playing: three wave arcs */}
+          {isPlaying && (
+            <g stroke="#ffd040" strokeWidth="1.6" strokeLinecap="round" style={{ transition: "opacity 200ms" }}>
+              <path d="M14 9c1 1 1 3 0 4" opacity="1" />
+              <path d="M16 7c2 2 2 6 0 8" opacity="0.9" />
+              <path d="M18 5c3 3 3 11 0 14" opacity="0.7" />
+            </g>
+          )}
+        </svg>
       </div>
     </div>
   );
