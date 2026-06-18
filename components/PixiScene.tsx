@@ -9,6 +9,7 @@ import GrassField from "./grass_field";
 import Tree from "./tree";
 import FlowerStem from "./flower_stem";
 import FlowerBasket from "./FlowerBasket";
+import ResetButton from "./ResetButton";
 import InstructionBox from "./InstructionBox";
 import Hand from "./hand";
 import MusicPlayer from "./MusicPlayer";
@@ -56,6 +57,7 @@ export default function PixiScene() {
           <InstructionBox />
           {/* Flower basket in top-right */}
           <FlowerBasket />
+          <ResetButton />
           <Application
             resizeTo={resizeTarget}
             antialias={false}

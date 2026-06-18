@@ -94,8 +94,17 @@ export default function FlowerBasket() {
       window.setTimeout(() => setBump(false), 220);
     };
     window.addEventListener("flowerPicked", handler as EventListener);
-    return () =>
-      window.removeEventListener("flowerPicked", handler as EventListener);
+    return () => window.removeEventListener("flowerPicked", handler as EventListener);
+  }, [save]);
+
+  // Listen for an external reset event (clear localStorage and UI).
+  useEffect(() => {
+    const reset = () => {
+      setFlowers([]);
+      save([]);
+    };
+    window.addEventListener("flowerBasketReset", reset as EventListener);
+    return () => window.removeEventListener("flowerBasketReset", reset as EventListener);
   }, [save]);
 
   // Deterministic flower-per-slot based on slot index, so the same slot

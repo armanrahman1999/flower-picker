@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Howl } from "howler";
+import { Howl, Howler } from "howler";
 
 const SRC = encodeURI("/Anemone Symphony.mp3");
 const STORAGE_KEY = "musicPlaying";
@@ -39,9 +39,19 @@ export default function MusicPlayer() {
     // If the user previously opted to have music on, attempt to resume.
     if (desiredPlay) {
       try {
+        try {
+          Howler.unmute();
+          // resume audio context if suspended (some browsers require a user gesture)
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Howler.ctx?.resume?.();
+        } catch {}
         howl.play();
-      } catch {
+      } catch (err) {
         // ignore; user can toggle to start
+        // keep a console hint for debugging
+        // eslint-disable-next-line no-console
+        console.debug("MusicPlayer: autoplay attempt failed", err);
       }
     }
 
@@ -51,6 +61,26 @@ export default function MusicPlayer() {
       howl.off("stop", onStop);
       howl.unload();
     };
+  }, [howl]);
+
+  // Respond to external reset requests (clear storage and stop playback)
+  useEffect(() => {
+    const handleReset = () => {
+      try {
+        howl.stop();
+      } catch {}
+      try {
+        setIsPlaying(false);
+      } catch {}
+      try {
+        setDesiredPlay(false);
+      } catch {}
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {}
+    };
+    window.addEventListener("musicReset", handleReset as EventListener);
+    return () => window.removeEventListener("musicReset", handleReset as EventListener);
   }, [howl]);
 
   const toggle = useCallback(() => {
@@ -63,6 +93,12 @@ export default function MusicPlayer() {
       } catch {}
     } else {
       try {
+        try {
+          Howler.unmute();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Howler.ctx?.resume?.();
+        } catch {}
         howl.play();
         // actual isPlaying will be set by Howler's onplay handler
         setDesiredPlay(true);
