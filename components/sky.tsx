@@ -4,6 +4,8 @@ import { extend, useApplication } from "@pixi/react";
 import { Graphics } from "pixi.js";
 import { useCallback, useRef, useEffect } from "react";
 
+type TickerDelta = number | { deltaTime?: number; delta?: number };
+
 extend({ Graphics });
 
 // Sky color bands for the three key moments of the cycle. Each array has the
@@ -55,8 +57,12 @@ function lerp(a: number, b: number, t: number) {
 }
 
 function lerpColor(c1: number, c2: number, t: number) {
-  const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff;
-  const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff;
+  const r1 = (c1 >> 16) & 0xff,
+    g1 = (c1 >> 8) & 0xff,
+    b1 = c1 & 0xff;
+  const r2 = (c2 >> 16) & 0xff,
+    g2 = (c2 >> 8) & 0xff,
+    b2 = c2 & 0xff;
   const r = Math.round(lerp(r1, r2, t));
   const g = Math.round(lerp(g1, g2, t));
   const b = Math.round(lerp(b1, b2, t));
@@ -138,44 +144,47 @@ export default function Sky() {
     [width, height],
   );
 
-  const drawSunShape = useCallback((g: Graphics, cx: number, cy: number, alpha: number) => {
-    if (alpha <= 0.01) return;
-    const P = 8;
+  const drawSunShape = useCallback(
+    (g: Graphics, cx: number, cy: number, alpha: number) => {
+      if (alpha <= 0.01) return;
+      const P = 8;
 
-    const haloRadius = 6 * P;
-    for (let oy = -haloRadius; oy <= haloRadius; oy += P) {
-      for (let ox = -haloRadius; ox <= haloRadius; ox += P) {
-        const dist = Math.sqrt(ox * ox + oy * oy);
-        if (dist > haloRadius) continue;
-        const factor = 1 - dist / haloRadius;
-        const a = Math.max(0, 0.6 * factor) * alpha;
-        if (a < 0.02) continue;
-        g.setFillStyle({ color: 0xfff5c0, alpha: a });
-        g.drawRect(cx + ox, cy + oy, P, P);
-        g.fill();
+      const haloRadius = 6 * P;
+      for (let oy = -haloRadius; oy <= haloRadius; oy += P) {
+        for (let ox = -haloRadius; ox <= haloRadius; ox += P) {
+          const dist = Math.sqrt(ox * ox + oy * oy);
+          if (dist > haloRadius) continue;
+          const factor = 1 - dist / haloRadius;
+          const a = Math.max(0, 0.6 * factor) * alpha;
+          if (a < 0.02) continue;
+          g.setFillStyle({ color: 0xfff5c0, alpha: a });
+          g.drawRect(cx + ox, cy + oy, P, P);
+          g.fill();
+        }
       }
-    }
 
-    g.setFillStyle({ color: 0xffe060, alpha });
-    for (let ry = -1; ry <= 1; ry++) {
-      for (let rx = -1; rx <= 1; rx++) {
-        g.drawRect(cx + rx * P, cy + ry * P, P, P);
+      g.setFillStyle({ color: 0xffe060, alpha });
+      for (let ry = -1; ry <= 1; ry++) {
+        for (let rx = -1; rx <= 1; rx++) {
+          g.drawRect(cx + rx * P, cy + ry * P, P, P);
+        }
       }
-    }
-    g.drawRect(cx - 2 * P, cy, P, P);
-    g.drawRect(cx + 2 * P, cy, P, P);
-    g.drawRect(cx, cy - 2 * P, P, P);
-    g.drawRect(cx, cy + 2 * P, P, P);
-    g.fill();
+      g.drawRect(cx - 2 * P, cy, P, P);
+      g.drawRect(cx + 2 * P, cy, P, P);
+      g.drawRect(cx, cy - 2 * P, P, P);
+      g.drawRect(cx, cy + 2 * P, P, P);
+      g.fill();
 
-    g.setFillStyle({ color: 0xffffcc, alpha });
-    g.drawRect(cx, cy, P, P);
-    g.drawRect(cx - P, cy, P, P);
-    g.drawRect(cx + P, cy, P, P);
-    g.drawRect(cx, cy - P, P, P);
-    g.drawRect(cx, cy + P, P, P);
-    g.fill();
-  }, []);
+      g.setFillStyle({ color: 0xffffcc, alpha });
+      g.drawRect(cx, cy, P, P);
+      g.drawRect(cx - P, cy, P, P);
+      g.drawRect(cx + P, cy, P, P);
+      g.drawRect(cx, cy - P, P, P);
+      g.drawRect(cx, cy + P, P, P);
+      g.fill();
+    },
+    [],
+  );
 
   // Draws the sun for a given progress value. Same idea as drawSkyAtProgress:
   // pure, called directly every tick, no dependency on the draw prop.
@@ -188,14 +197,22 @@ export default function Sky() {
 
       if (progress <= SET_END) {
         const t = easeInOutCubic(progress / SET_END);
-        const x = Math.round(lerp(sunStart.xf * width, sunSetTarget.xf * width, t));
-        const y = Math.round(lerp(sunStart.yf * height, sunSetTarget.yf * height, t));
+        const x = Math.round(
+          lerp(sunStart.xf * width, sunSetTarget.xf * width, t),
+        );
+        const y = Math.round(
+          lerp(sunStart.yf * height, sunSetTarget.yf * height, t),
+        );
         const alpha = Math.max(0, 1 - t * 1.15);
         drawSunShape(g, x, y, alpha);
       } else if (progress >= RISE_START) {
         const t = easeInOutCubic((progress - RISE_START) / (1 - RISE_START));
-        const x = Math.round(lerp(sunRiseFrom.xf * width, sunRiseTarget.xf * width, t));
-        const y = Math.round(lerp(sunRiseFrom.yf * height, sunRiseTarget.yf * height, t));
+        const x = Math.round(
+          lerp(sunRiseFrom.xf * width, sunRiseTarget.xf * width, t),
+        );
+        const y = Math.round(
+          lerp(sunRiseFrom.yf * height, sunRiseTarget.yf * height, t),
+        );
         const alpha = Math.min(1, t * 1.3);
         drawSunShape(g, x, y, alpha);
       }
@@ -215,52 +232,92 @@ export default function Sky() {
   );
 
   useEffect(() => {
-    if (!app || !(app as any).ticker) return;
+    if (!app) return;
+    const ticker = (
+      app as unknown as {
+        ticker?: {
+          add: (cb: (d: number) => void) => void;
+          remove: (cb: (d: number) => void) => void;
+        };
+      }
+    ).ticker;
+    if (!ticker) return;
 
     const baseX = 0;
     const cloudAmplitude = Math.max(32, width * 0.12);
     const cloudSpeed = 0.14;
 
-    const storedDone = window.localStorage.getItem("flowerStemSkyTransitionDone") === "true";
+    const storedDone =
+      window.localStorage.getItem("flowerStemSkyTransitionDone") === "true";
     if (storedDone) {
       transitionRequestedRef.current = true;
       cycleProgressRef.current = 1;
       cycleDoneRef.current = true;
     }
 
+    // Capture ref values locally so cleanup uses the same instances the
+    // effect worked with (prevents stale-ref lint warnings).
+    const skyG = skyRef.current;
+    const sunG = sunRef.current;
+    const cloudG = cloudRef.current;
+
     // Paint the very first frame immediately so the scene isn't blank while
     // waiting for the first ticker callback.
-    if (skyRef.current) drawSkyAtProgress(skyRef.current, cycleProgressRef.current);
-    if (sunRef.current) drawSunAtProgress(sunRef.current, cycleProgressRef.current);
+    if (skyG) drawSkyAtProgress(skyG, cycleProgressRef.current);
+    if (sunG) drawSunAtProgress(sunG, cycleProgressRef.current);
 
     const onTransitionRequested = () => {
       if (!cycleDoneRef.current) transitionRequestedRef.current = true;
     };
 
-    window.addEventListener("flowerSkyTransitionRequested", onTransitionRequested);
+    window.addEventListener(
+      "flowerSkyTransitionRequested",
+      onTransitionRequested,
+    );
 
-    const tick = (delta: any) => {
-      const dt = typeof delta === "number" ? delta / 60 : (delta.deltaTime ?? delta.delta ?? 16) / 1000;
+    const tick = (delta: TickerDelta) => {
+      const dt =
+        typeof delta === "number"
+          ? delta / 60
+          : (delta.deltaTime ?? delta.delta ?? 16) / 1000;
 
       cloudTimeRef.current += dt;
-      const offset = -Math.sin(cloudTimeRef.current * cloudSpeed) * cloudAmplitude;
-      if (cloudRef.current) cloudRef.current.position.set(baseX + offset, 0);
+      const offset =
+        -Math.sin(cloudTimeRef.current * cloudSpeed) * cloudAmplitude;
+      if (cloudG) cloudG.position.set(baseX + offset, 0);
 
       if (!cycleDoneRef.current && transitionRequestedRef.current) {
-        cycleProgressRef.current = Math.min(1, cycleProgressRef.current + dt / CYCLE_DURATION);
-        if (skyRef.current) drawSkyAtProgress(skyRef.current, cycleProgressRef.current);
-        if (sunRef.current) drawSunAtProgress(sunRef.current, cycleProgressRef.current);
+        cycleProgressRef.current = Math.min(
+          1,
+          cycleProgressRef.current + dt / CYCLE_DURATION,
+        );
+        if (skyG) drawSkyAtProgress(skyG, cycleProgressRef.current);
+        if (sunG) drawSunAtProgress(sunG, cycleProgressRef.current);
         if (cycleProgressRef.current >= 1) cycleDoneRef.current = true;
       }
     };
 
-    (app as any).ticker.add(tick as any);
+    if (ticker && typeof ticker.add === "function") {
+      ticker.add(tick as unknown as (d: number) => void);
+    }
+
     return () => {
-      (app as any).ticker.remove(tick as any);
-      window.removeEventListener("flowerSkyTransitionRequested", onTransitionRequested);
-      if (cloudRef.current) cloudRef.current.position.set(baseX, 0);
+      // app or its ticker may become null between effect runs; guard against that.
+      try {
+        if (ticker && typeof ticker.remove === "function") {
+          ticker.remove(tick as unknown as (d: number) => void);
+        }
+      } catch {
+        // swallow any errors during cleanup to avoid crashing the app
+        // (debugging info could be logged here if desired)
+      }
+      window.removeEventListener(
+        "flowerSkyTransitionRequested",
+        onTransitionRequested,
+      );
+      if (cloudG) cloudG.position.set(baseX, 0);
     };
-  }, [app, width, drawSkyAtProgress, drawSunAtProgress]);
+  }, [app, width, drawSkyAtProgress, drawSunAtProgress, CYCLE_DURATION]);
 
   const drawClouds = useCallback(
     (g: Graphics) => {

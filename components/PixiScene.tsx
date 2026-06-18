@@ -8,6 +8,8 @@ import Ground from "./ground";
 import GrassField from "./grass_field";
 import Tree from "./tree";
 import FlowerStem from "./flower_stem";
+import FlowerBasket from "./FlowerBasket";
+import InstructionBox from "./InstructionBox";
 import Hand from "./hand";
 
 extend({ Graphics });
@@ -49,24 +51,29 @@ export default function PixiScene() {
   return (
     <div ref={containerRef} className="fixed inset-0 w-screen h-screen">
       {resizeTarget && (
-        <Application
-          resizeTo={resizeTarget}
-          antialias={false}
-          background="#1a1a2e"
-        >
-          <Sky />
-          <Ground width={size.width} height={size.height} />
+        <>
+          <InstructionBox />
+          {/* Flower basket in top-right */}
+          <FlowerBasket />
+          <Application
+            resizeTo={resizeTarget}
+            antialias={false}
+            background="#1a1a2e"
+          >
+            <Sky />
+            <Ground width={size.width} height={size.height} />
 
-          {/* <GrassField renderGround={false} /> */}
-          <GrassField renderGround={false} groundY={groundY} />
-          <Tree x={edgeMargin} y={groundY - 4} />
-          <Tree
-            x={Math.max(edgeMargin, size.width - edgeMargin)}
-            y={groundY - 4}
-          />
-          <Hand x={handX} y={handY} />
-          <FlowerStem x={handX} y={size.height * 0.7} />
-        </Application>
+            {/* <GrassField renderGround={false} /> */}
+            <GrassField renderGround={false} groundY={groundY} />
+            <Tree x={edgeMargin} y={groundY - 4} />
+            <Tree
+              x={Math.max(edgeMargin, size.width - edgeMargin)}
+              y={groundY - 4}
+            />
+            <Hand x={handX} y={handY} />
+            <FlowerStem x={handX} y={size.height * 0.7} />
+          </Application>
+        </>
       )}
     </div>
   );

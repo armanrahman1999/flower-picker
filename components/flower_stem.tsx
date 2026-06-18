@@ -29,7 +29,8 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
   const handlePointerDown = useCallback(() => {
     if (pickedRef.current) return;
 
-    const alreadyDone = window.localStorage.getItem(TRANSITION_STORAGE_KEY) === "true";
+    const alreadyDone =
+      window.localStorage.getItem(TRANSITION_STORAGE_KEY) === "true";
     if (!alreadyDone) {
       window.localStorage.setItem(TRANSITION_STORAGE_KEY, "true");
       window.dispatchEvent(new Event("flowerSkyTransitionRequested"));
@@ -37,6 +38,14 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
 
     pickedRef.current = true;
     setVisible(false);
+    // notify listeners (e.g. basket) that a flower was picked
+    try {
+      window.dispatchEvent(
+        new CustomEvent("flowerPicked", { detail: { time: Date.now() } }),
+      );
+    } catch (e) {
+      // ignore in non-browser environments
+    }
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
       pickedRef.current = false;
