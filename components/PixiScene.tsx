@@ -77,7 +77,7 @@ export default function PixiScene() {
             />
             <Hand x={handX} y={handY} />
             <FlowerStem x={handX} y={size.height * 0.7} />
-            <ScreenBushes screenWidth={size.width} screenHeight={size.height + 38} />
+            <ScreenBushes screenWidth={size.width} screenHeight={size.height + 40} />
             {/* Bushes positioned relative to screen size */}
             <BushSingle x={size.width * 0.2} y={size.height * 0.78} width={100} height={50} />
             <BushSingle x={size.width * 0.9} y={size.height * 0.68} width={60} height={20} />
