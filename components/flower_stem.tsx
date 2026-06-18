@@ -100,8 +100,16 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
     setVisible(false);
     // notify listeners (e.g. basket) that a flower was picked
     try {
+      const toHex = (n: number) => `#${n.toString(16).padStart(6, "0")}`;
+      const palette = PALETTES[paletteIndex] ?? PALETTES[0];
+      const colors = {
+        petal: toHex(palette.main),
+        center: toHex(palette.centerLight),
+      };
       window.dispatchEvent(
-        new CustomEvent("flowerPicked", { detail: { time: Date.now() } }),
+        new CustomEvent("flowerPicked", {
+          detail: { time: Date.now(), paletteIndex, colors },
+        }),
       );
     } catch (e) {
       // ignore in non-browser environments
@@ -119,7 +127,7 @@ export default function FlowerStem({ x, y }: FlowerStemProps) {
       });
       setVisible(true);
     }, 4000);
-  }, []);
+  }, [paletteIndex]);
 
   const draw = useCallback(
     (g: Graphics) => {

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 
-const STORAGE_KEY = "flowerPickCount";
+const STORAGE_KEY = "flowerPickStack";
 
 // How many flowers can actually be "shown" sitting in the basket before
 // it's considered full. Past this, the count badge keeps climbing but no
@@ -61,29 +61,32 @@ function PixelFlower({
 }
 
 export default function FlowerBasket() {
-  const [count, setCount] = useState<number>(() => {
+  type Picked = { petal: string; center: string };
+  const [flowers, setFlowers] = useState<Picked[]>(() => {
     try {
-      if (typeof window === "undefined") return 0;
+      if (typeof window === "undefined") return [];
       const v = window.localStorage.getItem(STORAGE_KEY);
-      return v ? parseInt(v, 10) || 0 : 0;
+      return v ? (JSON.parse(v) as Picked[]) : [];
     } catch {
-      return 0;
+      return [];
     }
   });
   const [bump, setBump] = useState(false);
 
-  const save = useCallback((n: number) => {
+  const save = useCallback((arr: Picked[]) => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, String(n));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
     } catch {
       // noop
     }
   }, []);
 
   useEffect(() => {
-    const handler = () => {
-      setCount((c) => {
-        const n = c + 1;
+    const handler = (e: Event) => {
+      const d = (e as CustomEvent)?.detail ?? {};
+      const colors = d.colors ?? { petal: "#f06c87", center: "#ffd84a" };
+      setFlowers((prev) => {
+        const n = [...prev, colors];
         save(n);
         return n;
       });
@@ -98,14 +101,16 @@ export default function FlowerBasket() {
   // Deterministic flower-per-slot based on slot index, so the same slot
   // always gets the same flower once filled (no flicker on re-render).
   const visibleFlowers = useMemo(() => {
-    const shown = Math.min(count, MAX_VISIBLE_FLOWERS);
+    const shown = Math.min(flowers.length, MAX_VISIBLE_FLOWERS);
+    // show the most recent picks in the visible slots
+    const recent = flowers.slice(-shown);
     return SLOTS.slice(0, shown).map((slot, i) => ({
       ...slot,
-      colors: FLOWER_PALETTE[i % FLOWER_PALETTE.length],
+      colors: recent[i] ?? FLOWER_PALETTE[i % FLOWER_PALETTE.length],
     }));
-  }, [count]);
+  }, [flowers]);
 
-  const isFull = count >= MAX_VISIBLE_FLOWERS;
+  const isFull = flowers.length >= MAX_VISIBLE_FLOWERS;
 
   return (
     <div
@@ -248,7 +253,7 @@ export default function FlowerBasket() {
             pointerEvents: "none",
           }}
         >
-          {count}
+          {flowers.length}
         </div>
 
         {/* small "full" indicator once the basket can't visually hold more */}
