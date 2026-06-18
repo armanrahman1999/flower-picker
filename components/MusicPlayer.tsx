@@ -11,10 +11,11 @@ export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [desiredPlay, setDesiredPlay] = useState<boolean>(() => {
     try {
-      if (typeof window === "undefined") return false;
-      return window.localStorage.getItem(STORAGE_KEY) === "true";
+      if (typeof window === "undefined") return true;
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      return stored === null ? true : stored === "true";
     } catch {
-      return false;
+      return true;
     }
   });
   const howl = useMemo(() => {
@@ -25,6 +26,16 @@ export default function MusicPlayer() {
       onplay: () => {},
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Ensure global Howler is unmuted and audio context is ready on mount
+    try {
+      Howler.mute(false);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      Howler.ctx?.resume?.();
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -39,13 +50,6 @@ export default function MusicPlayer() {
     // If the user previously opted to have music on, attempt to resume.
     if (desiredPlay) {
       try {
-        try {
-          Howler.unmute();
-          // resume audio context if suspended (some browsers require a user gesture)
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          Howler.ctx?.resume?.();
-        } catch {}
         howl.play();
       } catch (err) {
         // ignore; user can toggle to start
@@ -61,7 +65,7 @@ export default function MusicPlayer() {
       howl.off("stop", onStop);
       howl.unload();
     };
-  }, [howl]);
+  }, [howl, desiredPlay]);
 
   // Respond to external reset requests (clear storage and stop playback)
   useEffect(() => {
@@ -95,7 +99,7 @@ export default function MusicPlayer() {
     } else {
       try {
         try {
-          Howler.unmute();
+          Howler.mute(false);
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           Howler.ctx?.resume?.();
