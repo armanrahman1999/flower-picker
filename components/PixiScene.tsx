@@ -11,6 +11,7 @@ import FlowerStem from "./flower_stem";
 import FlowerBasket from "./FlowerBasket";
 import InstructionBox from "./InstructionBox";
 import Hand from "./hand";
+import MusicPlayer from "./MusicPlayer";
 
 extend({ Graphics });
 
@@ -73,6 +74,7 @@ export default function PixiScene() {
             <Hand x={handX} y={handY} />
             <FlowerStem x={handX} y={size.height * 0.7} />
           </Application>
+          <MusicPlayer />
         </>
       )}
     </div>
