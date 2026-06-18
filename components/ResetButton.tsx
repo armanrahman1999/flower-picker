@@ -10,7 +10,8 @@ const TRANSITION_KEY = "flowerStemSkyTransitionDone";
 export default function ResetButton() {
   const handleReset = useCallback(() => {
     if (typeof window === "undefined") return;
-    if (!window.confirm("Clear all saved data and reset the experience?")) return;
+    if (!window.confirm("Clear all saved data and reset the experience?"))
+      return;
 
     try {
       window.localStorage.removeItem(BASKET_KEY);
@@ -76,9 +77,22 @@ export default function ResetButton() {
         }}
       >
         {/* circular arrow icon */}
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden
+        >
           <path d="M21 12a9 9 0 10-3.2 6.7L21 12z" fill="#ffd040" />
-          <path d="M21 12l-4 4" stroke="#1a0d04" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M21 12l-4 4"
+            stroke="#1a0d04"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
     </div>

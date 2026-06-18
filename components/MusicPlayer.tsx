@@ -80,7 +80,8 @@ export default function MusicPlayer() {
       } catch {}
     };
     window.addEventListener("musicReset", handleReset as EventListener);
-    return () => window.removeEventListener("musicReset", handleReset as EventListener);
+    return () =>
+      window.removeEventListener("musicReset", handleReset as EventListener);
   }, [howl]);
 
   const toggle = useCallback(() => {
