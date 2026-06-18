@@ -22,17 +22,17 @@ export default function Hand({ x, y }: HandProps) {
 
     // ── ARM ──
     g.setFillStyle({ color: skin })
-    g.drawRect(-4*P, 8*P, 8*P, 12*P)
+    g.drawRect(-4*P, 8*P, 8*P, 18*P)
     g.fill()
 
     // arm shadow left
     g.setFillStyle({ color: skinDark })
-    g.drawRect(-4*P, 8*P, P, 10*P)
+    g.drawRect(-4*P, 8*P, P, 16*P)
     g.fill()
 
     // arm highlight right
     g.setFillStyle({ color: skinLight })
-    g.drawRect(2*P, 8*P, P, 10*P)
+    g.drawRect(2*P, 8*P, P, 16*P)
     g.fill()
 
     // ── PALM ──
